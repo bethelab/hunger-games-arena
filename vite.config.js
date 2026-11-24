@@ -3,11 +3,10 @@ import react from '@vitejs/plugin-react'
 import { createPanemSyncMiddleware } from './server/panemSyncMiddleware.js'
 
 function panemSyncPlugin() {
-  const middleware = createPanemSyncMiddleware()
   return {
     name: 'panem-sync-server',
     configureServer(server) {
-      server.middlewares.use(middleware)
+      server.middlewares.use(createPanemSyncMiddleware())
     }
   }
 }

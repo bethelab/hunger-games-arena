@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #FAF5FF;
+    color: #2E1065;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* When night mode / arena danger is toggled */
+  body.dark-mode, .dark-theme {
+    background-color: #0F081D;
+    color: #F5EEF8;
+  }
+
+  h1, h2, h3, .font-cinzel {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+  }
+
+  .font-mono-capitol {
+    font-family: 'Share Tech Mono', monospace;
+  }
+}
+
+/* 1970s Sunrise on the Reaping Painted Borders */
+.retro-border-light {
+  border: 1.5px solid rgba(124, 58, 237, 0.25);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.08), 0 1px 3px rgba(249, 115, 22, 0.08);
+}
+
+.retro-border-glow {
+  border: 2px solid rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.25), inset 0 0 15px rgba(249, 115, 22, 0.1);
+}
+
+/* Subtle 70s print texture effect */
+.reaping-sun-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.15) 0%, rgba(124, 58, 237, 0.08) 50%, transparent 80%);
+}
+
+.reaping-night-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.25) 0%, rgba(234, 88, 12, 0.1) 50%, #0F081D 90%);
+}

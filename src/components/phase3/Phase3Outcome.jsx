@@ -40,28 +40,31 @@ export default function Phase3Outcome({
         </h2>
       </div>
 
-      {/* Private Personal Outcome & Score Card (ONLY visible to the current tribute) */}
+      {/* Personal Outcome & Score Card */}
       {myResult && (
         <div className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-wrap items-center justify-between gap-4 shadow-sm ${
-          myResult.p3GotSick
+          myResult.p3Died || myResult.p3GotSick
             ? 'bg-rose-50 border-rose-300 text-rose-950'
             : 'bg-emerald-50 border-emerald-300 text-emerald-950'
         }`}>
           <div className="flex items-center gap-3">
-            {myResult.p3GotSick ? (
+            {myResult.p3Died || myResult.p3GotSick ? (
               <AlertTriangle className="w-8 h-8 text-rose-600 shrink-0" />
             ) : (
               <ShieldCheck className="w-8 h-8 text-emerald-600 shrink-0" />
             )}
             <div>
               <div className="text-sm sm:text-base font-black font-cinzel">
-                {myResult.p3GotSick
-                  ? 'Contaminated water made you sick!'
+                {myResult.p3Died
+                  ? 'You were ambushed on the journey! (-5 pts)'
+                  : myResult.p3GotSick
+                  ? 'Contaminated water made you sick! (-2 pts)'
                   : 'You hydrated safely!'}
               </div>
               <div className="text-xs opacity-80 font-mono-capitol">
                 {LOC_LABELS[myResult.p3Location]?.name} • {myResult.p3Action === 'purify' ? 'Purified first' : 'Drank immediately'}
-                {myResult.p3GotSick ? ` • Contamination penalty: -${myResult.p3Penalty}` : ''}
+                {myResult.p3MismatchPenalty ? ` • Team mismatch: ${myResult.p3MismatchPenalty}` : ''}
+                {myResult.p3ToolBonus ? ` • Team purifier bonus: +${myResult.p3ToolBonus}` : ''}
               </div>
             </div>
           </div>
@@ -73,7 +76,7 @@ export default function Phase3Outcome({
             <div className={`text-2xl font-black font-mono ${
               (myResult.p3RoundPoints || 0) >= 0 ? 'text-emerald-700' : 'text-rose-700'
             }`}>
-              +{myResult.p3RoundPoints ?? 0} pts
+              {(myResult.p3RoundPoints || 0) >= 0 ? `+${myResult.p3RoundPoints}` : myResult.p3RoundPoints} pts
             </div>
             <div className="text-[11px] font-mono-capitol opacity-80">
               Total: <strong>{myResult.totalScore ?? 0} pts</strong>
@@ -184,11 +187,13 @@ export default function Phase3Outcome({
                 </div>
 
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono-capitol uppercase shrink-0 ${
-                  t.p3GotSick
-                    ? 'bg-rose-100 text-rose-700'
+                  t.p3Died
+                    ? 'bg-rose-200 text-rose-800'
+                    : t.p3GotSick
+                    ? 'bg-amber-100 text-amber-800'
                     : 'bg-emerald-100 text-emerald-700'
                 }`}>
-                  {t.p3GotSick ? 'Ill' : 'Healthy'}
+                  {t.p3Died ? 'Killed (-5)' : t.p3GotSick ? 'Sick (-2)' : 'Healthy'}
                 </span>
               </div>
             );

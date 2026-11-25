@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 import AvatarRenderer from '../AvatarRenderer';
 import { DISTRICTS } from '../../data/hungerGamesData';
-import { Trophy, MessageCircle, RotateCcw } from 'lucide-react';
+import { Trophy, MessageCircle, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function GrandFinale({
   isGamemaker,
@@ -10,6 +10,8 @@ export default function GrandFinale({
   tributes,
   onBackToLobby
 }) {
+  const [expandedId, setExpandedId] = useState(null);
+
   const leaderboard = [...tributes].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
   const victor = leaderboard[0] || null;
   const victorDistrict = victor ? (DISTRICTS.find(d => d.id === victor.districtId) || DISTRICTS[0]) : null;
@@ -22,6 +24,10 @@ export default function GrandFinale({
       colors: ['#F97316', '#7C3AED', '#FBBF24', '#C026D3', '#10B981']
     });
   }, []);
+
+  const toggleExpand = (id) => {
+    setExpandedId(prev => (prev === id ? null : id));
+  };
 
   return (
     <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl w-full mx-auto space-y-6">
@@ -59,21 +65,29 @@ export default function GrandFinale({
         )}
       </div>
 
-      {/* Final Leaderboard (Revealed for the Grand Finale across all 5 phases) */}
+      {/* Final Leaderboard with Clean Per-User Expandable Score Breakdown Dropdown */}
       <div className="bg-white rounded-3xl border-2 border-purple-200 p-5 sm:p-6 shadow-md space-y-3">
-        <h2 className="text-sm font-black font-cinzel text-purple-950 uppercase tracking-wider flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-orange-600" />
-          Final Leaderboard (All 5 Phases)
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-black font-cinzel text-purple-950 uppercase tracking-wider flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-orange-600" />
+            Final Leaderboard (All 5 Phases)
+          </h2>
+          <span className="text-[11px] text-purple-500 font-mono-capitol">
+            Click any tribute to view score breakdown
+          </span>
+        </div>
 
-        <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
           {leaderboard.map((t, index) => {
             const dist = DISTRICTS.find(d => d.id === t.districtId) || DISTRICTS[0];
             const isMe = t.id === currentTribute?.id;
+            const isOpen = expandedId === t.id;
+            const history = Array.isArray(t.scoreHistory) ? t.scoreHistory : [];
+
             return (
               <div
                 key={t.id}
-                className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
+                className={`rounded-2xl border overflow-hidden transition-all ${
                   index === 0
                     ? 'bg-orange-50 border-orange-400 shadow-sm'
                     : isMe
@@ -81,38 +95,79 @@ export default function GrandFinale({
                     : 'bg-purple-50/40 border-purple-100'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black font-mono shrink-0 ${
-                    index === 0
-                      ? 'bg-orange-500 text-white'
-                      : index === 1
-                      ? 'bg-purple-800 text-white'
-                      : index === 2
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-purple-100 text-purple-700'
-                  }`}>
-                    {index + 1}
-                  </span>
+                <button
+                  type="button"
+                  onClick={() => toggleExpand(t.id)}
+                  className="w-full p-3 flex items-center justify-between gap-3 text-left hover:bg-black/[0.02] transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black font-mono shrink-0 ${
+                      index === 0
+                        ? 'bg-orange-500 text-white'
+                        : index === 1
+                        ? 'bg-purple-800 text-white'
+                        : index === 2
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {index + 1}
+                    </span>
 
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-white border border-purple-200 flex items-center justify-center shrink-0">
-                    <AvatarRenderer avatar={t.avatar} districtId={t.districtId} size="sm" />
+                    <div className="w-9 h-9 rounded-full overflow-hidden bg-white border border-purple-200 flex items-center justify-center shrink-0">
+                      <AvatarRenderer avatar={t.avatar} districtId={t.districtId} size="sm" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm font-black font-cinzel text-purple-950 truncate flex items-center gap-1.5">
+                        <span>{t.realName}</span>
+                        {isMe && <span className="text-[9px] px-1 rounded bg-orange-200 text-orange-800 font-sans">YOU</span>}
+                      </div>
+                      <div className="text-[10px] text-purple-600 font-mono-capitol truncate">
+                        {dist.icon} {dist.name}
+                        {t.allianceName ? ` • ${t.allianceName}` : ''}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="min-w-0">
-                    <div className="text-xs sm:text-sm font-black font-cinzel text-purple-950 truncate flex items-center gap-1.5">
-                      <span>{t.realName}</span>
-                      {isMe && <span className="text-[9px] px-1 rounded bg-orange-200 text-orange-800 font-sans">YOU</span>}
-                    </div>
-                    <div className="text-[10px] text-purple-600 font-mono-capitol truncate">
-                      {dist.icon} {dist.name}
-                      {t.allianceName ? ` • ${t.allianceName}` : ''}
-                    </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm sm:text-base font-black font-mono text-purple-950">
+                      {t.totalScore ?? 0} pts
+                    </span>
+                    {isOpen ? (
+                      <ChevronUp className="w-4 h-4 text-purple-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-purple-500" />
+                    )}
                   </div>
-                </div>
+                </button>
 
-                <span className="text-sm sm:text-base font-black font-mono text-purple-950 shrink-0">
-                  {t.totalScore ?? 0} pts
-                </span>
+                {isOpen && (
+                  <div className="px-4 pb-3 pt-2 border-t border-purple-200/70 bg-white/80 space-y-1.5">
+                    {history.length > 0 ? (
+                      history.map((item, i) => (
+                        <div key={i} className="flex items-center justify-between gap-2 text-[11px] font-mono-capitol">
+                          <div className="min-w-0">
+                            <span className="font-bold text-purple-950">{item.phase}: </span>
+                            <span className="text-purple-700">{item.detail}</span>
+                          </div>
+                          <span className={`font-black font-mono shrink-0 ${
+                            item.points > 0
+                              ? 'text-emerald-700'
+                              : item.points < 0
+                              ? 'text-rose-700'
+                              : 'text-purple-500'
+                          }`}>
+                            {item.points > 0 ? `+${item.points}` : item.points}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-[11px] text-purple-500 font-mono-capitol">
+                        No round scores recorded yet.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

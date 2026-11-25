@@ -1,8 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Countdown from '../phase1/Countdown';
-import AvatarRenderer from '../AvatarRenderer';
-import { PERSONAS } from './Phase5Pitch';
-import { Heart, CheckCircle2, ArrowRight, Lock } from 'lucide-react';
+import { Heart, CheckCircle2, ArrowRight, UserCheck } from 'lucide-react';
 
 export default function Phase5Vote({
   isGamemaker,
@@ -17,7 +15,16 @@ export default function Phase5Vote({
   onRevealWinner
 }) {
   const totalVotesCast = Object.keys(votes || {}).length;
-  const eligibleCandidates = tributes.filter(t => t.id !== currentTribute?.id);
+
+  // Deterministic pseudo-random shuffle of other tributes so names stay 100% anonymous & unbiased
+  const anonymousCandidates = useMemo(() => {
+    const others = tributes.filter(t => t.id !== currentTribute?.id);
+    return [...others].sort((a, b) => {
+      const ha = (a.id || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0) * 17, 0);
+      const hb = (b.id || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0) * 17, 0);
+      return ha - hb;
+    });
+  }, [tributes, currentTribute?.id]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-5">
@@ -44,7 +51,7 @@ export default function Phase5Vote({
           </div>
 
           <p className="text-xs text-purple-600 font-mono-capitol">
-            1st place earns +5 pts • Runner-up +3 pts • 3rd place +1 pt
+            Tribute names are hidden so everyone votes purely on the pitch. 1st: +5 pts • 2nd: +3 pts • 3rd: +1 pt
           </p>
 
           <button
@@ -61,19 +68,18 @@ export default function Phase5Vote({
             <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-purple-950">
               Cast Your Sponsor Vote
             </h2>
-            <p className="text-xs sm:text-sm text-purple-700 flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-orange-600" />
-              Vote anonymously for one other tribute (you cannot vote for yourself).
+            <p className="text-xs sm:text-sm text-purple-700">
+              Names are hidden to keep voting unbiased — pick the pitch that convinces you most!
             </p>
           </div>
 
-          {eligibleCandidates.length > 0 ? (
+          {anonymousCandidates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {eligibleCandidates.map((t) => {
+              {anonymousCandidates.map((t, index) => {
                 const p = pitches?.[t.id];
-                const pInfo = PERSONAS.find(x => x.id === p?.persona) || PERSONAS[4];
                 const isSelected = myVote === t.id;
                 const isLockedOther = Boolean(myVote) && !isSelected;
+                const anonLabel = `Tribute ${String.fromCharCode(65 + (index % 26))}`;
 
                 return (
                   <button
@@ -81,7 +87,7 @@ export default function Phase5Vote({
                     type="button"
                     disabled={Boolean(myVote)}
                     onClick={() => onCastVote(t.id)}
-                    className={`text-left p-4 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3 ${
+                    className={`text-left p-5 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3 ${
                       isSelected
                         ? 'bg-orange-50 border-orange-500 shadow-lg ring-4 ring-orange-200'
                         : isLockedOther
@@ -90,21 +96,18 @@ export default function Phase5Vote({
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-purple-50 border border-purple-200 flex items-center justify-center shrink-0">
-                          <AvatarRenderer avatar={t.avatar} districtId={t.districtId} size="sm" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-sm font-black font-cinzel text-purple-950 truncate">{t.realName}</div>
-                          <div className="text-[10px] font-mono-capitol font-bold text-orange-700">
-                            {pInfo.icon} {pInfo.label}
-                          </div>
-                        </div>
+                      <div className="inline-flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center">
+                          <UserCheck className="w-4 h-4" />
+                        </span>
+                        <span className="text-sm font-black font-cinzel text-purple-950">
+                          {anonLabel}
+                        </span>
                       </div>
                       {isSelected && <CheckCircle2 className="w-5 h-5 text-orange-600 shrink-0" />}
                     </div>
 
-                    <p className="text-xs text-purple-800 italic leading-relaxed">
+                    <p className="text-xs sm:text-sm text-purple-800 italic leading-relaxed">
                       {p?.pitch ? `“${p.pitch}”` : '“Sponsor me — I am built to survive.”'}
                     </p>
                   </button>
@@ -121,7 +124,7 @@ export default function Phase5Vote({
             <div className="text-center pt-1">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono-capitol">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Anonymous sponsor vote locked in! Waiting for results...
+                Vote locked in! Waiting for results...
               </div>
             </div>
           )}

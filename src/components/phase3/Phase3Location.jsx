@@ -60,6 +60,7 @@ function getPct(count, total) {
 
 export default function Phase3Location({
   isGamemaker,
+  isInAlliance,
   countdown,
   duration,
   myLocation,
@@ -142,10 +143,16 @@ export default function Phase3Location({
             <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-purple-950">
               Where Will You Collect Your Water?
             </h2>
-            <p className="text-xs sm:text-sm text-purple-700 flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-orange-600" />
-              Your choice is private.
-            </p>
+            {isInAlliance ? (
+              <p className="text-xs sm:text-sm font-bold text-orange-800 bg-orange-50 border border-orange-300 inline-block px-4 py-1.5 rounded-full">
+                🤝 Make sure to communicate with your team member(s) — mismatched choices cost -3 pts each!
+              </p>
+            ) : (
+              <p className="text-xs sm:text-sm text-purple-700 flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-orange-600" />
+                Your choice is private.
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

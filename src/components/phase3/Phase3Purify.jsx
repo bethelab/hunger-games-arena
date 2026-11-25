@@ -47,6 +47,7 @@ function getPct(count, total) {
 
 export default function Phase3Purify({
   isGamemaker,
+  isInAlliance,
   countdown,
   duration,
   myLocation,
@@ -133,6 +134,13 @@ export default function Phase3Purify({
             <p className="text-xs sm:text-sm text-purple-800 bg-purple-50 border border-purple-200 inline-block px-3.5 py-1.5 rounded-full">
               <strong>{locInfo.name}:</strong> {locInfo.clue}
             </p>
+            {isInAlliance && (
+              <div>
+                <p className="text-xs font-bold text-orange-800 bg-orange-50 border border-orange-300 inline-block px-3.5 py-1 rounded-full">
+                  🤝 Coordinate with your alliance — picking differently costs -3 pts each!
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

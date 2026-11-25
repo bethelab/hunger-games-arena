@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Lightbulb, RotateCcw, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { Lightbulb, RotateCcw, ExternalLink, ChevronDown, ChevronUp, BookOpen } from 'lucide-react';
 
 const PHASE4_CARDS = [
   {
     number: '1',
     title: 'Cognitive flexibility',
-    description: 'The ability to adjust our thinking and approach when situations change.',
-    citation: 'Monsell, 2003',
-    paperUrl: 'https://doi.org/10.1016/S1364-6613(03)00028-7',
+    description: 'How people adjust their readiness to switch tasks and strategies when situations change.',
+    presenterDetail:
+      'Egner & Siqi-Liu (2024) reviewed task-switching studies showing how we regulate cognitive flexibility — shifting strategy carries a mental cost, yet staying rigid can be costly.',
+    citation: 'Egner & Siqi-Liu, 2024',
+    paperUrl: 'https://scholar.google.com/scholar?q=Egner+Siqi-Liu+2024+Insights+into+control+over+cognitive+flexibility+from+studies+of+task-switching',
     illustration: (
       <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Path branching around an obstacle */}
         <path d="M18 34 L50 34" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" />
         <rect x="52" y="25" width="16" height="18" rx="3" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2" />
         <path d="M44 34 C48 16 74 16 86 24 L98 24" stroke="#EA580C" strokeWidth="2.5" strokeLinecap="round" />
@@ -20,13 +21,14 @@ const PHASE4_CARDS = [
   },
   {
     number: '2',
-    title: 'Stress and coping',
-    description: 'How we interpret and respond to challenging situations influences our behaviour.',
-    citation: 'Lazarus & Folkman, 1984',
-    paperUrl: 'https://psycnet.apa.org/record/1984-97799-000',
+    title: 'Stress & decision-making',
+    description: 'Acute stress can impair decision quality across varying levels of decision complexity.',
+    presenterDetail:
+      'Doroc, Yadav & Murawski (2025) tested how acute stress affects decision-making quality, explaining why sudden twists and short countdowns cause very different reactions under pressure.',
+    citation: 'Doroc, Yadav & Murawski, 2025',
+    paperUrl: 'https://scholar.google.com/scholar?q=Doroc+Yadav+Murawski+2025+Acute+stress+impairs+decision-making+at+varying+levels+of+decision+complexity',
     illustration: (
       <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Same lightning bolt -> two different mind responses */}
         <path d="M60 10 L53 26 L61 26 L55 38" stroke="#EA580C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="32" cy="48" r="11" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2" />
         <path d="M27 50 Q32 44 37 50" stroke="#C2410C" strokeWidth="2" strokeLinecap="round" />
@@ -39,11 +41,12 @@ const PHASE4_CARDS = [
     number: '3',
     title: 'Escalation of commitment',
     description: "We sometimes continue with a failing decision because we've already invested in it.",
-    citation: 'Staw, 1976',
-    paperUrl: 'https://doi.org/10.1016/0030-5073(76)90005-2',
+    presenterDetail:
+      'A 2025 review of cognitive biases in strategic decision-making highlights how escalation of commitment and loss aversion push people to stick with a blocked plan instead of pivoting.',
+    citation: 'Strategic Decision-Making Review, 2025',
+    paperUrl: 'https://scholar.google.com/scholar?q=A+review+of+cognitive+biases+in+strategic+decision+making+2025+escalation+of+commitment',
     illustration: (
       <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Arrow pushing into a blocked wall */}
         <path d="M20 34 L74 34" stroke="#7C3AED" strokeWidth="3" strokeLinecap="round" />
         <path d="M68 28 L75 34 L68 40" stroke="#7C3AED" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         <rect x="82" y="14" width="12" height="40" rx="3" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2.5" />
@@ -58,7 +61,6 @@ export default function Phase4Lesson({ isGamemaker, onBackToWoods }) {
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-4xl bg-white rounded-3xl border-2 border-purple-200 shadow-xl p-6 sm:p-10 space-y-6">
-        {/* Title & Subtitle */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold font-mono-capitol uppercase">
             <Lightbulb className="w-3.5 h-3.5" />
@@ -72,7 +74,6 @@ export default function Phase4Lesson({ isGamemaker, onBackToWoods }) {
           </p>
         </div>
 
-        {/* 3 Psychology Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {PHASE4_CARDS.map((card) => (
             <div
@@ -90,6 +91,11 @@ export default function Phase4Lesson({ isGamemaker, onBackToWoods }) {
                 <p className="text-xs sm:text-sm text-purple-800 leading-relaxed">
                   {card.description}
                 </p>
+                {isGamemaker && (
+                  <p className="text-[11px] text-purple-700 bg-white/90 border border-purple-200 rounded-xl p-2.5 leading-relaxed">
+                    {card.presenterDetail}
+                  </p>
+                )}
               </div>
 
               <div className="pt-2 border-t border-purple-100">
@@ -111,9 +117,18 @@ export default function Phase4Lesson({ isGamemaker, onBackToWoods }) {
           Knowing when to change direction is a strength.
         </p>
 
-        {/* Gamemaker-Only Collapsible Speaking Script */}
         {isGamemaker && (
-          <div className="border-t border-purple-100 pt-3">
+          <div className="space-y-3 border-t border-purple-100 pt-3">
+            <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-1">
+              <div className="text-[11px] font-black font-mono-capitol uppercase text-orange-700 flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5" />
+                Gamemaker Presenter Notes
+              </div>
+              <p className="text-xs sm:text-sm text-purple-950 leading-relaxed">
+                When the Gamemakers change the arena, participants must decide whether to stick with their original strategy or change direction — a vivid demonstration of how acute stress and commitment bias shape decisions.
+              </p>
+            </div>
+
             <button
               type="button"
               onClick={() => setShowScript(!showScript)}
@@ -124,13 +139,12 @@ export default function Phase4Lesson({ isGamemaker, onBackToWoods }) {
             </button>
 
             {showScript && (
-              <div className="mt-2.5 p-4 rounded-2xl bg-purple-50/40 border border-purple-100 text-xs text-purple-900 space-y-2 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-purple-50/40 border border-purple-100 text-xs text-purple-900 space-y-2 leading-relaxed">
                 <p>
-                  &ldquo;This round was all about adaptability and how we respond when things don&apos;t go according to plan.
-                  One interesting psychological concept is escalation of commitment — people sometimes continue with a decision even when it&apos;s no longer working, simply because they&apos;ve already invested time, effort or resources into it.&rdquo;
+                  &ldquo;This round was all about adaptability and how we respond when things don&apos;t go according to plan. With escalation of commitment, people sometimes continue with a decision even when it&apos;s no longer working, simply because they&apos;ve already invested in it.&rdquo;
                 </p>
                 <p>
-                  &ldquo;Changing your mind isn&apos;t a sign of weakness — sometimes it&apos;s a sign that you&apos;ve recognised the situation has changed. Don&apos;t become so attached to your original plan that you fail to recognise when it&apos;s time for a new one.&rdquo;
+                  &ldquo;Changing your mind isn&apos;t a sign of weakness — sometimes it&apos;s a sign that you&apos;ve recognised the situation has changed.&rdquo;
                 </p>
               </div>
             )}

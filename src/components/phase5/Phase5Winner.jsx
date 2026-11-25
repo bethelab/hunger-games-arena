@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import AvatarRenderer from '../AvatarRenderer';
-import { PERSONAS } from './Phase5Pitch';
-import { Award, Sparkles, ArrowRight, Lock } from 'lucide-react';
+import { Award, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function Phase5Winner({
   isGamemaker,
@@ -25,11 +24,8 @@ export default function Phase5Winner({
     });
   }, []);
 
-  const winnerPersona = PERSONAS.find(x => x.id === winner?.p5Persona) || PERSONAS[4];
-
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 max-w-3xl w-full mx-auto space-y-5">
-      {/* Dramatic Capitol Announcement Card */}
       <div className="w-full rounded-3xl bg-gradient-to-br from-purple-950 via-purple-900 to-orange-900 text-white p-6 sm:p-8 shadow-2xl border-2 border-orange-400 text-center space-y-4">
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-orange-500 text-white text-[11px] font-black font-mono-capitol uppercase tracking-widest">
           <Sparkles className="w-3.5 h-3.5" />
@@ -53,7 +49,7 @@ export default function Phase5Winner({
             <div>
               <div className="text-2xl font-black font-cinzel text-white">{winner.realName}</div>
               <div className="text-xs font-mono-capitol text-orange-300">
-                {winnerPersona.icon} {winnerPersona.label} • {winnerEntry.votes} sponsor vote{winnerEntry.votes === 1 ? '' : 's'}
+                {winnerEntry.votes} sponsor vote{winnerEntry.votes === 1 ? '' : 's'}
               </div>
             </div>
             {winner.p5Pitch && (
@@ -69,7 +65,6 @@ export default function Phase5Winner({
           <p className="text-sm text-purple-200 py-4">No sponsor votes were cast this round.</p>
         )}
 
-        {/* Runner-up & 3rd place mentions */}
         {runnerUps.length > 0 && (
           <div className="flex flex-wrap items-center justify-center gap-3 pt-3 border-t border-white/15">
             {runnerUps.map((entry) => {
@@ -87,19 +82,19 @@ export default function Phase5Winner({
         )}
       </div>
 
-      {/* Private Personal Score Card for Current Tribute */}
+      {/* Sponsor Score Card for Current Tribute (ONLY sponsor bonus) */}
       {myResult && (
         <div className="w-full p-4 rounded-2xl bg-white border-2 border-purple-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-[10px] font-mono-capitol uppercase text-purple-600 font-bold">
-              Phase 5 Score
+              Sponsor Vote Result
             </div>
             <div className="text-xs text-purple-800 font-mono-capitol mt-0.5">
-              Pitch +{myResult.p5Breakdown?.ptsPitch ?? 0} • Creativity +{myResult.p5Breakdown?.ptsCreative ?? 0} • Persuasion +{myResult.p5Breakdown?.ptsPersuasive ?? 0} • Sponsor +{myResult.p5Breakdown?.ptsSponsor ?? 0}
+              You received <strong>{myResult.p5Votes ?? 0}</strong> sponsor vote{(myResult.p5Votes ?? 0) === 1 ? '' : 's'}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-black font-mono text-emerald-700">+{myResult.p5RoundPoints ?? 0} pts</div>
+            <div className="text-xl font-black font-mono text-emerald-700">+{myResult.p5SponsorBonus ?? 0} pts</div>
             <div className="text-[11px] font-mono-capitol text-purple-700">
               Total: <strong>{myResult.totalScore ?? 0} pts</strong>
             </div>

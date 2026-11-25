@@ -1,16 +1,17 @@
 import React from 'react';
-import { Lightbulb, RotateCcw, ExternalLink, MessageCircle } from 'lucide-react';
+import { Lightbulb, RotateCcw, ExternalLink, BookOpen } from 'lucide-react';
 
 const PHASE3_CARDS = [
   {
     number: '1',
     title: 'Present bias',
-    description: 'We often favour immediate rewards over future benefits.',
-    citation: 'Laibson, 1997',
-    paperUrl: 'https://doi.org/10.1162/003355397555253',
+    description: 'We often favour immediate rewards and convenience over future benefits.',
+    presenterDetail:
+      "Taş, Maknoon & Rezaei (2026) systematically reviewed intertemporal decision-making biases — showing why saving time right now (nearby puddle / drinking immediately) feels more appealing than waiting.",
+    citation: 'Taş, Maknoon & Rezaei, 2026',
+    paperUrl: 'https://scholar.google.com/scholar?q=Tas+Maknoon+Rezaei+2026+Time+Influence+Systematic+Review+of+Biases+in+Intertemporal+Decision-Making',
     illustration: (
       <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Big "NOW" circle vs smaller "LATER" circle */}
         <circle cx="38" cy="36" r="18" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2.5" />
         <text x="38" y="40" textAnchor="middle" fill="#C2410C" fontSize="10" fontWeight="bold">NOW</text>
         <path d="M62 36 L76 36" stroke="#A78BFA" strokeWidth="2" strokeDasharray="3 2" />
@@ -23,11 +24,12 @@ const PHASE3_CARDS = [
     number: '2',
     title: 'Risk perception',
     description: "Our feelings about danger don't always match the actual level of risk.",
-    citation: 'Slovic, 1987',
-    paperUrl: 'https://doi.org/10.1126/science.3563507',
+    presenterDetail:
+      'Perlstein (2023) explored how people interpret and discuss uncertain risks — clear mountain water feels safe, while travel danger feels less obvious until it hits.',
+    citation: 'Perlstein, 2023',
+    paperUrl: 'https://scholar.google.com/scholar?q=Perlstein+2023+Risk+perception+and+interpersonal+discussion+on+risk',
     illustration: (
       <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Eye looking through tinted lens at warning triangle */}
         <path d="M20 34 Q42 14 64 34 Q42 54 20 34 Z" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="2" />
         <circle cx="42" cy="34" r="7" fill="#5B21B6" />
         <path d="M84 18 L102 50 L66 50 Z" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2.2" strokeLinejoin="round" />
@@ -37,13 +39,14 @@ const PHASE3_CARDS = [
   },
   {
     number: '3',
-    title: 'Effort justification',
-    description: 'We can place greater value on something simply because we worked hard to obtain it.',
-    citation: 'Festinger, 1957',
-    paperUrl: 'https://psycnet.apa.org/record/1958-00265-000',
+    title: 'Effort & reward value',
+    description: 'How effort changes how much we value an outcome depends partly on perceived control.',
+    presenterDetail:
+      'Harmon-Jones et al. (2024) found effort-reward valuation depends on perceived control. Relatedly, Campbell, Wang & Inzlicht (2025, 6 studies, n = 2,883) showed exerting effort increases perceived meaning — though not via simple post-hoc justification.',
+    citation: 'Harmon-Jones et al., 2024',
+    paperUrl: 'https://scholar.google.com/scholar?q=Harmon-Jones+2024+Does+effort+increase+or+decrease+reward+valuation',
     illustration: (
       <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Steep climb leading to a shining star */}
         <path d="M18 54 L46 38 L66 42 L94 18" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="94" cy="18" r="9" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2" />
         <text x="94" y="22" textAnchor="middle" fill="#EA580C" fontSize="11" fontWeight="bold">★</text>
@@ -56,7 +59,6 @@ export default function Phase3Lesson({ isGamemaker, onBackToWoods }) {
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-4xl bg-white rounded-3xl border-2 border-purple-200 shadow-xl p-6 sm:p-10 space-y-6">
-        {/* Title & Subtitle */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold font-mono-capitol uppercase">
             <Lightbulb className="w-3.5 h-3.5" />
@@ -70,7 +72,6 @@ export default function Phase3Lesson({ isGamemaker, onBackToWoods }) {
           </p>
         </div>
 
-        {/* 3 Psychology Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {PHASE3_CARDS.map((card) => (
             <div
@@ -88,6 +89,11 @@ export default function Phase3Lesson({ isGamemaker, onBackToWoods }) {
                 <p className="text-xs sm:text-sm text-purple-800 leading-relaxed">
                   {card.description}
                 </p>
+                {isGamemaker && (
+                  <p className="text-[11px] text-purple-700 bg-white/90 border border-purple-200 rounded-xl p-2.5 leading-relaxed">
+                    {card.presenterDetail}
+                  </p>
+                )}
               </div>
 
               <div className="pt-2 border-t border-purple-100">
@@ -105,25 +111,22 @@ export default function Phase3Lesson({ isGamemaker, onBackToWoods }) {
           ))}
         </div>
 
-        {/* Key Summary Line */}
         <p className="text-center text-xs sm:text-sm font-bold text-purple-900 font-mono-capitol">
           Convenience, effort and confidence can all influence our decisions.
         </p>
 
-        {/* Discussion Question */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-orange-50/80 border border-orange-200 flex items-start gap-3">
-          <MessageCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <div className="text-[11px] font-black font-mono-capitol uppercase text-orange-700">
-              Discussion Question
+        {isGamemaker && (
+          <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-1.5">
+            <div className="text-[11px] font-black font-mono-capitol uppercase text-orange-700 flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5" />
+              Gamemaker Presenter Notes
             </div>
-            <p className="text-xs sm:text-sm text-purple-950 italic leading-relaxed">
-              &ldquo;Did you choose the nearby water because you wanted to save time, or the distant water because you believed more effort meant a better outcome? And did you trust your instincts when deciding whether to purify it?&rdquo;
+            <p className="text-xs sm:text-sm text-purple-950 leading-relaxed">
+              Related finding: <a href="https://scholar.google.com/scholar?q=Campbell+Wang+Inzlicht+2025+Experimental+evidence+that+exerting+effort+increases+meaning" target="_blank" rel="noopener noreferrer" className="underline font-bold text-orange-700">Campbell, Wang &amp; Inzlicht (2025)</a> found across 6 studies (2,883 participants) that exerting more effort increases how meaningful an activity feels — though working harder to reach a distant stream does not automatically eliminate risk!
             </p>
           </div>
-        </div>
+        )}
 
-        {/* Gamemaker Return / Tribute Wait */}
         {isGamemaker ? (
           <div className="text-center pt-1">
             <button

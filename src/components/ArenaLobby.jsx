@@ -64,11 +64,15 @@ export default function ArenaLobby({ currentTribute }) {
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [hasCelebratedEntry, setHasCelebratedEntry] = useState(false);
+  const [viewAsPlayer, setViewAsPlayer] = useState(false);
 
   const isGamemaker = currentTribute?.role === 'gamemaker';
+  // Gamemaker keeps all header controls, but can toggle screen content between Gamemaker view and Player view
+  const effectiveIsGamemaker = isGamemaker && !viewAsPlayer;
   const completedPhase = game?.completedPhase || 0;
   const inTheWoods = completedPhase >= 1;
   const myTributeRecord = !isGamemaker ? tributes.find(t => t.id === currentTribute?.id) : null;
+  const isInAlliance = myTributeRecord?.allianceMode === 'alliance';
 
   // Subscribe to live multi-device synchronization
   useEffect(() => {
@@ -216,22 +220,22 @@ export default function ArenaLobby({ currentTribute }) {
     syncService.submitVote(currentTribute.id, act, 'phase3_purify');
   };
 
-  const handleSubmitPhase4Initial = (move, reason) => {
+  const handleSubmitPhase4Initial = (move) => {
     if (!currentTribute?.id) return;
     sound.playBeep();
-    syncService.submitVote(currentTribute.id, move, 'phase4_initial', { reason });
+    syncService.submitVote(currentTribute.id, move, 'phase4_initial');
   };
 
-  const handleSubmitPhase4Rethink = (action, newMove, reason) => {
+  const handleSubmitPhase4Rethink = (action, newMove) => {
     if (!currentTribute?.id) return;
     sound.playBeep();
-    syncService.submitVote(currentTribute.id, action, 'phase4_twist', { newMove, reason });
+    syncService.submitVote(currentTribute.id, action, 'phase4_twist', { newMove });
   };
 
-  const handleSubmitPhase5Pitch = (persona, pitch) => {
+  const handleSubmitPhase5Pitch = (pitch) => {
     if (!currentTribute?.id) return;
     sound.playBeep();
-    syncService.submitVote(currentTribute.id, 'pitch', 'phase5_pitch', { persona, pitch });
+    syncService.submitVote(currentTribute.id, 'pitch', 'phase5_pitch', { pitch });
   };
 
   const handleCastPhase5Vote = (targetTributeId) => {
@@ -361,18 +365,48 @@ export default function ArenaLobby({ currentTribute }) {
             )}
           </div>
         ) : isGamemaker ? (
-          <button
-            onClick={handleToggleTimerVisibility}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-all"
-            title="Enable header timer for everyone"
-          >
-            <Eye className="w-3.5 h-3.5 text-purple-600" />
-            <span>Enable Timer</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleToggleTimerVisibility}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-all"
+              title="Enable header timer for everyone"
+            >
+              <Eye className="w-3.5 h-3.5 text-purple-600" />
+              <span>Enable Timer</span>
+            </button>
+            {(timer.running || ['choice', 'p2_choice', 'p3_location', 'p3_purify', 'p4_event', 'p4_twist', 'p5_pitch', 'p5_vote'].includes(phase)) && (
+              <button
+                onClick={handleToggleTimer}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm transition-all ${
+                  timer.running
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                }`}
+                title={timer.running ? 'Pause active game countdown' : 'Resume active game countdown'}
+              >
+                {timer.running ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white" />}
+                <span>{timer.running ? 'Pause' : 'Resume'}</span>
+              </button>
+            )}
+          </div>
         ) : null}
 
-        {/* Top Right: Gamemaker Phase Launch Button, QR, Reset & Roster */}
+        {/* Top Right: Gamemaker Phase Launch Button, View Toggle, QR, Reset & Roster */}
         <div className="flex items-center gap-2">
+          {isGamemaker && (
+            <button
+              onClick={() => setViewAsPlayer(!viewAsPlayer)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-sm ${
+                viewAsPlayer
+                  ? 'bg-purple-800 text-white border-purple-900'
+                  : 'bg-purple-50 hover:bg-purple-100 text-purple-800 border-purple-200'
+              }`}
+              title="Switch main display between Gamemaker view and Player view"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{viewAsPlayer ? 'Player View' : 'Gamemaker View'}</span>
+            </button>
+          )}
           {isGamemaker && phase === 'lobby' && completedPhase === 0 && (
             <button
               onClick={handleStartIntro}
@@ -469,7 +503,7 @@ export default function ArenaLobby({ currentTribute }) {
       {/* Phase 1 */}
       {phase === 'intro' && (
         <ArenaIntro
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           durationSeconds={durationInput}
           tributeCount={tributes.length}
           onChangeDuration={handleChangeDuration}
@@ -478,7 +512,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'choice' && (
         <CornucopiaChoice
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           countdown={timer.countdown}
           duration={timer.duration || durationInput}
           myChoice={myChoice}
@@ -489,14 +523,14 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'results' && (
         <VoteResults
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           poll={game?.poll}
           onRevealConsequences={handleRevealConsequences}
         />
       )}
       {phase === 'consequences' && (
         <ConsequenceReveal
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
           poll={game?.poll}
@@ -506,7 +540,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'lesson' && (
         <LessonReveal
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           onBackToLobby={handleBackToLobby}
         />
       )}
@@ -514,7 +548,7 @@ export default function ArenaLobby({ currentTribute }) {
       {/* Phase 2 */}
       {phase === 'p2_intro' && (
         <Phase2Intro
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           durationSeconds={game?.durationSeconds || 60}
           tributeCount={tributes.length}
           onStartChoice={handleStartPhase2Choice}
@@ -522,7 +556,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p2_choice' && (
         <Phase2Choice
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           countdown={timer.countdown}
           duration={timer.duration || 60}
           myChoice={myP2Choice}
@@ -533,7 +567,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p2_alliances' && (
         <AllianceReveal
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
           alliances={game?.alliances}
@@ -543,7 +577,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p2_lesson' && (
         <Phase2Lesson
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -551,7 +585,7 @@ export default function ArenaLobby({ currentTribute }) {
       {/* Phase 3 */}
       {phase === 'p3_intro' && (
         <Phase3Intro
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           durationSeconds={game?.durationSeconds || 30}
           tributeCount={tributes.length}
           onStartLocation={handleStartPhase3Location}
@@ -559,7 +593,8 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p3_location' && (
         <Phase3Location
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
+          isInAlliance={isInAlliance}
           countdown={timer.countdown}
           duration={timer.duration || 30}
           myLocation={myP3Location}
@@ -570,7 +605,8 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p3_purify' && (
         <Phase3Purify
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
+          isInAlliance={isInAlliance}
           countdown={timer.countdown}
           duration={timer.duration || 30}
           myLocation={myP3Location}
@@ -582,7 +618,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p3_outcome' && (
         <Phase3Outcome
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
           locationPoll={game?.p3LocationPoll}
@@ -592,7 +628,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p3_lesson' && (
         <Phase3Lesson
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -600,7 +636,7 @@ export default function ArenaLobby({ currentTribute }) {
       {/* Phase 4 */}
       {phase === 'p4_intro' && (
         <Phase4Intro
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           durationSeconds={game?.durationSeconds || 30}
           tributeCount={tributes.length}
           onStartEvent={handleStartPhase4Event}
@@ -608,7 +644,8 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p4_event' && (
         <Phase4Event
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
+          isInAlliance={isInAlliance}
           countdown={timer.countdown}
           duration={timer.duration || 30}
           myInitial={myP4Initial}
@@ -619,7 +656,8 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p4_twist' && (
         <Phase4Twist
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
+          isInAlliance={isInAlliance}
           countdown={timer.countdown}
           duration={timer.duration || 15}
           twist={game?.p4Twist}
@@ -632,7 +670,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p4_outcome' && (
         <Phase4Outcome
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
           twist={game?.p4Twist}
@@ -643,7 +681,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p4_lesson' && (
         <Phase4Lesson
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -651,7 +689,7 @@ export default function ArenaLobby({ currentTribute }) {
       {/* Phase 5 & Grand Finale */}
       {phase === 'p5_intro' && (
         <Phase5Intro
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           durationSeconds={game?.durationSeconds || 60}
           tributeCount={tributes.length}
           onStartPitch={handleStartPhase5Pitch}
@@ -659,7 +697,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p5_pitch' && (
         <Phase5Pitch
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           countdown={timer.countdown}
           duration={timer.duration || 60}
           tributes={tributes}
@@ -671,7 +709,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p5_vote' && (
         <Phase5Vote
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           countdown={timer.countdown}
           duration={timer.duration || 45}
@@ -685,7 +723,7 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p5_winner' && (
         <Phase5Winner
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
           podium={game?.p5Podium}
@@ -694,13 +732,13 @@ export default function ArenaLobby({ currentTribute }) {
       )}
       {phase === 'p5_lesson' && (
         <Phase5Lesson
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           onShowFinale={handleShowFinale}
         />
       )}
       {phase === 'finale' && (
         <GrandFinale
-          isGamemaker={isGamemaker}
+          isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
           onBackToLobby={handleBackToLobby}

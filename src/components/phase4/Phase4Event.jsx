@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Countdown from '../phase1/Countdown';
 import { Flame, CheckCircle2, BarChart3, Zap, Lock } from 'lucide-react';
 
-const EVENT_CARDS = [
+const ALL_EVENT_CARDS = [
   {
     id: 'stay',
     letter: 'A',
@@ -22,7 +22,8 @@ const EVENT_CARDS = [
     letter: 'C',
     icon: '🤝',
     title: 'Find your alliance',
-    description: 'Reunite with your partner before making a move. Strength in numbers, but it could cost valuable time.'
+    description: 'Reunite with your partner before making a move. Strength in numbers, but it could cost valuable time.',
+    requiresAlliance: true
   }
 ];
 
@@ -33,6 +34,7 @@ function getPct(count, total) {
 
 export default function Phase4Event({
   isGamemaker,
+  isInAlliance,
   countdown,
   duration,
   myInitial,
@@ -40,22 +42,14 @@ export default function Phase4Event({
   onSubmitInitial,
   onTriggerTwist
 }) {
-  const [selectedMove, setSelectedMove] = useState(null);
-  const [reason, setReason] = useState('');
-
   const totalVoted = poll?.totalVoted || 0;
   const totalTributes = poll?.totalTributes || 0;
-
-  const handleLockIn = () => {
-    if (!selectedMove || myInitial) return;
-    onSubmitInitial(selectedMove, reason);
-  };
+  const cards = ALL_EVENT_CARDS.filter(c => !c.requiresAlliance || isInAlliance);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-5">
       <Countdown countdown={countdown} duration={duration} />
 
-      {/* Dramatic Fire Alert Banner */}
       <div className="w-full max-w-3xl rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-purple-900 text-white px-5 py-3.5 shadow-lg flex items-center justify-center gap-3 text-center">
         <Flame className="w-6 h-6 shrink-0 animate-pulse" />
         <div>
@@ -117,7 +111,7 @@ export default function Phase4Event({
 
           <div className="pt-3 border-t border-purple-100 flex flex-wrap items-center justify-between gap-3">
             <p className="text-[11px] text-purple-500 font-mono-capitol">
-              Triggering the twist randomly selects Fire, Weather, Alliance, or Resources!
+              Not responding before time runs out costs -8 pts!
             </p>
             <button
               onClick={onTriggerTwist}
@@ -130,31 +124,42 @@ export default function Phase4Event({
         </div>
       ) : (
         <div className="w-full max-w-4xl space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {EVENT_CARDS.map((card) => {
+          <p className="text-center text-xs font-bold font-mono-capitol text-rose-700">
+            Decide before the timer hits 0 — freezing up costs -8 points!
+          </p>
+
+          <div className={`grid grid-cols-1 ${cards.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : 'md:grid-cols-3'} gap-4`}>
+            {cards.map((card) => {
               const lockedMove = myInitial?.move;
-              const isSelected = lockedMove ? lockedMove === card.id : selectedMove === card.id;
-              const isLockedOther = Boolean(lockedMove) && lockedMove !== card.id;
+              const isSelected = lockedMove === card.id;
+              const isLockedOther = Boolean(lockedMove) && !isSelected;
 
               return (
                 <button
                   key={card.id}
                   type="button"
                   disabled={Boolean(lockedMove)}
-                  onClick={() => setSelectedMove(card.id)}
+                  onClick={() => onSubmitInitial(card.id)}
                   className={`text-left p-5 rounded-3xl border-2 transition-all flex flex-col justify-between gap-3 min-h-[165px] ${
                     isSelected
                       ? 'bg-orange-50 border-orange-500 shadow-lg ring-4 ring-orange-300/40'
                       : isLockedOther
                       ? 'bg-purple-50/40 border-purple-100 opacity-45 cursor-not-allowed'
-                      : 'bg-white border-purple-200 hover:border-orange-400 hover:shadow-md cursor-pointer'
+                      : 'bg-white border-purple-200 hover:border-orange-400 hover:shadow-md active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-3xl">{card.icon}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-black font-mono-capitol">
-                      Option {card.letter}
-                    </span>
+                    {isSelected ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold uppercase font-mono-capitol">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Locked In
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-black font-mono-capitol">
+                        Option {card.letter}
+                      </span>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-base font-black font-cinzel text-purple-950">
@@ -169,26 +174,7 @@ export default function Phase4Event({
             })}
           </div>
 
-          {!myInitial ? (
-            <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-purple-200 p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shadow-sm">
-              <input
-                type="text"
-                maxLength={140}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Quick reason for your move (optional, +5 pts for a sensible reason)..."
-                className="flex-1 px-3.5 py-2.5 rounded-xl border border-purple-200 text-xs sm:text-sm text-purple-950 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
-              <button
-                type="button"
-                disabled={!selectedMove}
-                onClick={handleLockIn}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-purple-800 hover:opacity-95 disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider shadow-sm transition-all shrink-0"
-              >
-                Lock In Move
-              </button>
-            </div>
-          ) : (
+          {myInitial && (
             <div className="text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono-capitol">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />

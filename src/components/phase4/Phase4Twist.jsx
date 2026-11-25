@@ -15,6 +15,7 @@ function getPct(count, total) {
 
 export default function Phase4Twist({
   isGamemaker,
+  isInAlliance,
   countdown,
   duration,
   twist,
@@ -24,26 +25,18 @@ export default function Phase4Twist({
   onSubmitRethink,
   onRevealOutcomes
 }) {
-  const [action, setAction] = useState(null); // 'stick' | 'change'
-  const [newMove, setNewMove] = useState(null);
-  const [reason, setReason] = useState('');
+  const [pickingNew, setPickingNew] = useState(false);
 
   const totalVoted = poll?.totalVoted || 0;
   const totalTributes = poll?.totalTributes || 0;
   const originalMove = myInitial?.move || 'stay';
-  const alternativeMoves = Object.keys(MOVE_LABELS).filter(k => k !== originalMove);
-
-  const handleConfirm = () => {
-    if (!action || myRethink) return;
-    if (action === 'change' && !newMove) return;
-    onSubmitRethink(action, newMove, reason);
-  };
+  const availableMoves = isInAlliance ? ['stay', 'river', 'alliance'] : ['stay', 'river'];
+  const alternativeMoves = availableMoves.filter(k => k !== originalMove);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-5">
       <Countdown countdown={countdown} duration={duration || 15} />
 
-      {/* Randomized Gamemaker Twist Banner */}
       <div className="w-full max-w-3xl rounded-3xl bg-purple-950 text-white p-5 sm:p-6 shadow-xl border-2 border-orange-500 text-center space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-black font-mono-capitol uppercase tracking-widest">
           <Zap className="w-3 h-3" />
@@ -53,7 +46,7 @@ export default function Phase4Twist({
           {twist?.icon || '🔥'} {twist?.headline || 'YOUR ESCAPE ROUTE IS BLOCKED!'}
         </h2>
         <p className="text-xs sm:text-sm text-purple-100 max-w-xl mx-auto">
-          {twist?.message || 'Your planned escape route is no longer available.'} You have 15 seconds to rethink your strategy!
+          {twist?.message || 'Your planned escape route is no longer available.'} You have 15 seconds to react!
         </p>
       </div>
 
@@ -123,12 +116,8 @@ export default function Phase4Twist({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => { setAction('stick'); setNewMove(null); }}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                    action === 'stick'
-                      ? 'bg-orange-50 border-orange-500 shadow-md'
-                      : 'bg-purple-50/40 border-purple-200 hover:border-orange-400'
-                  }`}
+                  onClick={() => onSubmitRethink('stick', originalMove)}
+                  className="p-4 rounded-2xl border-2 text-left transition-all bg-purple-50/40 border-purple-200 hover:border-orange-500 hover:bg-orange-50 active:scale-[0.98]"
                 >
                   <div className="text-lg mb-1">📌</div>
                   <div className="text-sm font-black font-cinzel text-purple-950">Stick to original plan</div>
@@ -137,11 +126,17 @@ export default function Phase4Twist({
 
                 <button
                   type="button"
-                  onClick={() => setAction('change')}
+                  onClick={() => {
+                    if (alternativeMoves.length === 1) {
+                      onSubmitRethink('change', alternativeMoves[0]);
+                    } else {
+                      setPickingNew(true);
+                    }
+                  }}
                   className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                    action === 'change'
+                    pickingNew
                       ? 'bg-orange-50 border-orange-500 shadow-md'
-                      : 'bg-purple-50/40 border-purple-200 hover:border-orange-400'
+                      : 'bg-purple-50/40 border-purple-200 hover:border-orange-500 hover:bg-orange-50'
                   }`}
                 >
                   <div className="text-lg mb-1">🔄</div>
@@ -150,7 +145,7 @@ export default function Phase4Twist({
                 </button>
               </div>
 
-              {action === 'change' && (
+              {pickingNew && alternativeMoves.length > 1 && (
                 <div className="space-y-2 pt-1">
                   <div className="text-[11px] font-bold font-mono-capitol uppercase text-purple-700">
                     Pick your new move:
@@ -160,12 +155,8 @@ export default function Phase4Twist({
                       <button
                         key={m}
                         type="button"
-                        onClick={() => setNewMove(m)}
-                        className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all text-left ${
-                          newMove === m
-                            ? 'bg-purple-900 text-white border-purple-900'
-                            : 'bg-white text-purple-900 border-purple-200 hover:border-purple-400'
-                        }`}
+                        onClick={() => onSubmitRethink('change', m)}
+                        className="px-3.5 py-2.5 rounded-xl border border-purple-200 bg-white hover:bg-purple-900 hover:text-white text-purple-900 text-xs font-bold transition-all text-left"
                       >
                         {MOVE_LABELS[m]}
                       </button>
@@ -173,25 +164,6 @@ export default function Phase4Twist({
                   </div>
                 </div>
               )}
-
-              <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
-                <input
-                  type="text"
-                  maxLength={140}
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Why? (optional quick reason)..."
-                  className="flex-1 px-3.5 py-2 rounded-xl border border-purple-200 text-xs text-purple-950 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-                <button
-                  type="button"
-                  disabled={!action || (action === 'change' && !newMove)}
-                  onClick={handleConfirm}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-purple-800 hover:opacity-95 disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider shadow-sm transition-all shrink-0"
-                >
-                  Confirm
-                </button>
-              </div>
             </>
           ) : (
             <div className="text-center py-3">

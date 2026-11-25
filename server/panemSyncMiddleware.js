@@ -6,7 +6,7 @@ const STRATEGY_CONFIG = {
     tool: {
       name: 'Survival Tool Kit',
       icon: '🛠️',
-      effect: 'Water purification tabs & signal flare — helps protect you in later phases!'
+      effect: 'Water purification tabs & signal flare — gives you (and your team) a +2 bonus in Phase 3!'
     }
   },
   outskirts: {
@@ -29,13 +29,20 @@ const P3_LOCATION_POINTS = {
   stream: 16
 }
 
-const P3_COMBO_RISK = {
-  'puddle:drink': { illnessProb: 0.65, penalty: 8, label: 'High illness risk' },
-  'puddle:purify': { illnessProb: 0.20, penalty: 4, label: 'Safer, but still risky' },
-  'pond:drink': { illnessProb: 0.40, penalty: 6, label: 'Moderate illness risk' },
-  'pond:purify': { illnessProb: 0.0, penalty: 0, label: 'Good outcome' },
-  'stream:drink': { illnessProb: 0.15, penalty: 4, label: 'Lower risk, not guaranteed safe' },
-  'stream:purify': { illnessProb: 0.0, penalty: 0, label: 'Best outcome' }
+// Further travel = higher chance of dying (-5) on the journey; untreated water = chance of getting sick (-2)
+const P3_TRAVEL_DEATH_PROB = {
+  puddle: 0.05,
+  pond: 0.18,
+  stream: 0.35
+}
+
+const P3_SICK_PROB = {
+  'puddle:drink': 0.65,
+  'puddle:purify': 0.20,
+  'pond:drink': 0.40,
+  'pond:purify': 0.05,
+  'stream:drink': 0.15,
+  'stream:purify': 0.0
 }
 
 const P4_TWISTS = [
@@ -137,6 +144,11 @@ export function createPanemSyncMiddleware() {
 
   let gameState = createInitialGameState(30)
   const clients = new Set()
+
+  function appendScoreHistory(t, entry) {
+    const existing = Array.isArray(t.scoreHistory) ? t.scoreHistory : []
+    return [...existing.filter(e => e.phase !== entry.phase), entry]
+  }
 
   function recomputePoll() {
     let cornucopia = 0, outskirts = 0, woods = 0
@@ -265,36 +277,38 @@ export function createPanemSyncMiddleware() {
 
       if (strategy === 'cornucopia') {
         actualProb = probCornucopia
-        // Steep last-5-second danger for rushing the Cornucopia late (+6% at 5s left up to +36% at 0s)
         if (timeRemaining <= 5) {
           latePenalty = ((6 - timeRemaining) / 5) * 0.30
         }
       } else if (strategy === 'outskirts') {
         actualProb = probOutskirts
-        // Moderate last-5-second danger for lingering at the Outskirts (+3% at 5s left up to +18% at 0s)
         if (timeRemaining <= 5) {
           latePenalty = ((6 - timeRemaining) / 5) * 0.15
         }
       }
 
       const finalElimProb = Math.min(0.95, actualProb + latePenalty)
-
-      const eliminated = finalElimProb > 0 ? Math.random() < finalElimProb : false
-      const speedBonus = eliminated ? 0 : getSpeedBonus(responseTime)
-      const roundPoints = eliminated ? -5 : (config.basePoints + speedBonus)
+      const fell = finalElimProb > 0 ? Math.random() < finalElimProb : false
+      const speedBonus = fell ? 0 : getSpeedBonus(responseTime)
+      const roundPoints = fell ? -5 : (config.basePoints + speedBonus)
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
+
+      const detail = fell
+        ? `Hit in ${strategy} (-5)`
+        : `${strategy} (+${config.basePoints})${speedBonus ? ` + Speed (+${speedBonus})` : ''}`
 
       return {
         ...t,
         strategy,
         responseTime,
         latePenaltyPct: Math.round(latePenalty * 100),
-        supplies: eliminated ? 'Lost in Arena' : config.supplies,
-        arenaTool: !eliminated && config.tool ? config.tool : null,
-        survivalStatus: eliminated ? 'eliminated' : 'alive',
+        supplies: fell ? 'Lost in Arena' : config.supplies,
+        arenaTool: !fell && config.tool ? config.tool : null,
+        survivalStatus: fell ? 'eliminated' : 'alive',
         speedBonus,
         roundPoints,
-        totalScore: prevScore + roundPoints
+        totalScore: prevScore + roundPoints,
+        scoreHistory: appendScoreHistory(t, { phase: 'Phase 1: Cornucopia', points: roundPoints, detail })
       }
     })
 
@@ -374,6 +388,18 @@ export function createPanemSyncMiddleware() {
 
     recomputeP3Polls()
 
+    // Precompute alliance coordination & Phase 1 tool sharing per alliance
+    const allianceStats = {}
+    for (const team of gameState.alliances) {
+      const members = team.memberIds.map(id => tributes.find(t => t.id === id)).filter(Boolean)
+      const locs = new Set(members.map(m => gameState.p3Locations[m.id]))
+      const acts = new Set(members.map(m => gameState.p3Actions[m.id]))
+      const hasPurifyTool = members.some(m => Boolean(m.arenaTool))
+      const locMismatch = members.length > 1 && locs.size > 1
+      const actMismatch = members.length > 1 && acts.size > 1
+      allianceStats[team.id] = { hasPurifyTool, locMismatch, actMismatch }
+    }
+
     tributes = tributes.map(t => {
       const loc = gameState.p3Locations[t.id] || 'puddle'
       const act = gameState.p3Actions[t.id] || 'drink'
@@ -381,24 +407,50 @@ export function createPanemSyncMiddleware() {
       const purifyPts = act === 'purify' ? 4 : 0
       const baseScore = locPts + purifyPts
 
-      const combo = P3_COMBO_RISK[`${loc}:${act}`] || { illnessProb: 0.5, penalty: 6, label: 'Risky' }
-      // Phase 1 Cornucopia Survival Tool Kit halves water contamination illness risk!
-      const effectiveIllnessProb = t.arenaTool ? combo.illnessProb * 0.5 : combo.illnessProb
-      const gotSick = effectiveIllnessProb > 0 ? Math.random() < effectiveIllnessProb : false
-      const penaltyApplied = gotSick ? combo.penalty : 0
-      const p3RoundPoints = baseScore - penaltyApplied
+      // Further travel = higher chance of dying (-5); contaminated water = chance of getting sick (-2)
+      const deathProb = P3_TRAVEL_DEATH_PROB[loc] ?? 0.05
+      const died = Math.random() < deathProb
+
+      const sickProbBase = P3_SICK_PROB[`${loc}:${act}`] ?? 0.25
+      const teamInfo = t.allianceId ? allianceStats[t.allianceId] : null
+      const hasToolBenefit = Boolean(t.arenaTool) || Boolean(teamInfo?.hasPurifyTool)
+      const effectiveSickProb = hasToolBenefit ? sickProbBase * 0.5 : sickProbBase
+      const gotSick = !died && effectiveSickProb > 0 ? Math.random() < effectiveSickProb : false
+
+      const deathPenalty = died ? -5 : 0
+      const sickPenalty = gotSick ? -2 : 0
+
+      // Team mismatch penalties (-3 per mismatched decision) & shared tool bonus (+2 for team members if any has tool)
+      const mismatchPenalty =
+        (teamInfo?.locMismatch ? -3 : 0) +
+        (teamInfo?.actMismatch ? -3 : 0)
+      const toolTeamBonus = teamInfo?.hasPurifyTool ? 2 : 0
+
+      const p3RoundPoints = baseScore + deathPenalty + sickPenalty + mismatchPenalty + toolTeamBonus
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
+
+      const parts = [`${loc} (+${locPts})`]
+      if (purifyPts) parts.push('Purify (+4)')
+      if (died) parts.push('Killed on journey (-5)')
+      if (gotSick) parts.push('Sick (-2)')
+      if (mismatchPenalty) parts.push(`Team mismatch (${mismatchPenalty})`)
+      if (toolTeamBonus) parts.push('Team purifier (+2)')
 
       return {
         ...t,
         p3Location: loc,
         p3Action: act,
+        p3Died: died,
         p3GotSick: gotSick,
-        p3Penalty: penaltyApplied,
-        p3BaseScore: baseScore,
+        p3MismatchPenalty: mismatchPenalty,
+        p3ToolBonus: toolTeamBonus,
         p3RoundPoints,
-        p3OutcomeLabel: combo.label,
-        totalScore: prevScore + p3RoundPoints
+        totalScore: prevScore + p3RoundPoints,
+        scoreHistory: appendScoreHistory(t, {
+          phase: 'Phase 3: Finding Water',
+          points: p3RoundPoints,
+          detail: parts.join(' • ')
+        })
       }
     })
 
@@ -424,15 +476,23 @@ export function createPanemSyncMiddleware() {
       const rev = gameState.p4Rethink[t.id]
 
       const madeInitial = Boolean(init?.move)
-      const hasReason = Boolean((init?.reason && init.reason.trim().length >= 3) || (rev?.reason && rev.reason.trim().length >= 3))
       const adaptedToTwist = Boolean(rev?.action)
-      const withinCountdown = Boolean(init?.inTime || rev?.inTime)
+      const timedOut = !madeInitial || !adaptedToTwist
 
-      const ptsInitial = madeInitial ? 5 : 0
-      const ptsReason = hasReason ? 5 : 0
-      const ptsAdapt = adaptedToTwist ? 5 : 0
-      const ptsTimer = withinCountdown ? 5 : 0
-      const p4RoundPoints = ptsInitial + ptsReason + ptsAdapt + ptsTimer
+      let p4RoundPoints = 0
+      let detail = ''
+      let breakdown = { ptsInitial: 0, ptsAdapt: 0, ptsTimer: 0, timedOut }
+
+      if (timedOut) {
+        // Did not respond within countdown -> dies and loses -8 points
+        p4RoundPoints = -8
+        detail = 'Timed out (-8)'
+      } else {
+        breakdown = { ptsInitial: 5, ptsAdapt: 5, ptsTimer: 5, timedOut: false }
+        p4RoundPoints = 15
+        detail = `Initial (+5) • Adapted to twist (+5) • Within timer (+5)`
+      }
+
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
 
       return {
@@ -440,10 +500,15 @@ export function createPanemSyncMiddleware() {
         p4InitialMove: init?.move || null,
         p4TwistAction: rev?.action || null,
         p4FinalMove: rev?.action === 'change' ? (rev.newMove || init?.move) : (init?.move || null),
-        p4Reason: rev?.reason || init?.reason || '',
-        p4Breakdown: { ptsInitial, ptsReason, ptsAdapt, ptsTimer },
+        p4TimedOut: timedOut,
+        p4Breakdown: breakdown,
         p4RoundPoints,
-        totalScore: prevScore + p4RoundPoints
+        totalScore: prevScore + p4RoundPoints,
+        scoreHistory: appendScoreHistory(t, {
+          phase: 'Phase 4: Gamemakers Twist',
+          points: p4RoundPoints,
+          detail
+        })
       }
     })
 
@@ -467,7 +532,7 @@ export function createPanemSyncMiddleware() {
     const bonuses = [5, 3, 1]
 
     ranked.forEach((entry, idx) => {
-      if (idx < 3 && (entry.votes > 0 || (idx === 0 && entry.pitched))) {
+      if (idx < 3 && entry.votes > 0) {
         const bonus = bonuses[idx]
         bonusMap[entry.tributeId] = bonus
         podium.push({ ...entry, rank: idx + 1, bonus })
@@ -478,23 +543,24 @@ export function createPanemSyncMiddleware() {
       const pitchData = gameState.p5Pitches[t.id]
       const pitchText = pitchData?.pitch?.trim() || ''
       const votes = gameState.p5VoteCounts[t.id] || 0
-
-      const ptsPitch = pitchText.length >= 3 ? 5 : 0
-      const ptsCreative = (pitchData?.persona && pitchData.persona !== 'myself') || pitchText.length >= 25 ? 5 : 0
-      const ptsPersuasive = votes >= 1 || pitchText.length >= 55 ? 5 : 0
+      // Only keep the Sponsor popularity vote score (+5 / +3 / +1 / 0)
       const ptsSponsor = bonusMap[t.id] || 0
-      const p5RoundPoints = ptsPitch + ptsCreative + ptsPersuasive + ptsSponsor
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
 
       return {
         ...t,
-        p5Persona: pitchData?.persona || 'myself',
         p5Pitch: pitchText,
         p5Votes: votes,
         p5SponsorBonus: ptsSponsor,
-        p5Breakdown: { ptsPitch, ptsCreative, ptsPersuasive, ptsSponsor },
-        p5RoundPoints,
-        totalScore: prevScore + p5RoundPoints
+        p5RoundPoints: ptsSponsor,
+        totalScore: prevScore + ptsSponsor,
+        scoreHistory: appendScoreHistory(t, {
+          phase: 'Phase 5: Sponsors',
+          points: ptsSponsor,
+          detail: ptsSponsor > 0
+            ? `Sponsor vote bonus (+${ptsSponsor}, ${votes} vote${votes === 1 ? '' : 's'})`
+            : `${votes} sponsor vote${votes === 1 ? '' : 's'} (+0)`
+        })
       }
     })
 
@@ -519,7 +585,6 @@ export function createPanemSyncMiddleware() {
     broadcast('game', gameState)
   }
 
-  // Server-side 1-second countdown ticker
   setInterval(() => {
     if (timerState.running && timerState.countdown > 0) {
       timerState.countdown -= 1
@@ -577,7 +642,6 @@ export function createPanemSyncMiddleware() {
     }
   }, 1000)
 
-  // SSE keep-alive heartbeat every 25s so Render/cloud proxies never drop idle streams
   setInterval(() => {
     for (const res of clients) {
       try {
@@ -643,6 +707,7 @@ export function createPanemSyncMiddleware() {
             tribute.pedestalNumber = ped
             tribute.totalScore = tribute.totalScore ?? 0
             tribute.survivalStatus = tribute.survivalStatus ?? 'alive'
+            tribute.scoreHistory = tribute.scoreHistory ?? []
             tributes.push(tribute)
           }
 
@@ -922,7 +987,7 @@ export function createPanemSyncMiddleware() {
       req.on('data', chunk => { body += chunk })
       req.on('end', () => {
         try {
-          const { tributeId, strategy, phase: votePhase, reason, newMove, persona, pitch } = JSON.parse(body)
+          const { tributeId, strategy, phase: votePhase, newMove, pitch } = JSON.parse(body)
 
           if (votePhase === 'phase5_pitch' || gameState.phase === 'p5_pitch') {
             if (gameState.phase !== 'p5_pitch') {
@@ -931,7 +996,6 @@ export function createPanemSyncMiddleware() {
               return
             }
             gameState.p5Pitches[tributeId] = {
-              persona: persona || 'myself',
               pitch: typeof pitch === 'string' ? pitch.trim().slice(0, 240) : ''
             }
             broadcast('game', gameState)
@@ -975,7 +1039,6 @@ export function createPanemSyncMiddleware() {
             if (!gameState.p4Initial[tributeId]) {
               gameState.p4Initial[tributeId] = {
                 move: strategy,
-                reason: typeof reason === 'string' ? reason.trim().slice(0, 160) : '',
                 inTime: timerState.countdown > 0
               }
               recomputeP4Polls()
@@ -1001,7 +1064,6 @@ export function createPanemSyncMiddleware() {
               gameState.p4Rethink[tributeId] = {
                 action: strategy,
                 newMove: strategy === 'change' ? (newMove || null) : (gameState.p4Initial[tributeId]?.move || null),
-                reason: typeof reason === 'string' ? reason.trim().slice(0, 160) : '',
                 inTime: timerState.countdown > 0
               }
               recomputeP4Polls()

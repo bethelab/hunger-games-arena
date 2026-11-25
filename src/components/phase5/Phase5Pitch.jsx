@@ -3,14 +3,6 @@ import Countdown from '../phase1/Countdown';
 import AvatarRenderer from '../AvatarRenderer';
 import { Sparkles, CheckCircle2, ArrowRight, Mic } from 'lucide-react';
 
-export const PERSONAS = [
-  { id: 'underdog', icon: '🔥', label: 'The Underdog', tagline: 'The unexpected survivor.' },
-  { id: 'mastermind', icon: '🧠', label: 'The Mastermind', tagline: 'Always three steps ahead.' },
-  { id: 'favourite', icon: '✨', label: 'The Crowd Favourite', tagline: 'Wins people over effortlessly.' },
-  { id: 'wildcard', icon: '🎲', label: 'The Wildcard', tagline: 'Unpredictable and impossible to ignore.' },
-  { id: 'myself', icon: '🙋', label: 'Just Myself', tagline: 'Authentic and unfiltered.' }
-];
-
 export default function Phase5Pitch({
   isGamemaker,
   countdown,
@@ -21,15 +13,13 @@ export default function Phase5Pitch({
   onSubmitPitch,
   onStartVote
 }) {
-  const [persona, setPersona] = useState(myPitch?.persona || 'myself');
   const [pitchText, setPitchText] = useState(myPitch?.pitch || '');
-
   const submittedCount = Object.keys(pitches || {}).length;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!pitchText.trim()) return;
-    onSubmitPitch(persona, pitchText.trim());
+    onSubmitPitch(pitchText.trim());
   };
 
   return (
@@ -55,21 +45,17 @@ export default function Phase5Pitch({
 
           {submittedCount > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-1">
-              {tributes.map((t) => {
+              {tributes.map((t, idx) => {
                 const p = pitches?.[t.id];
                 if (!p) return null;
-                const pInfo = PERSONAS.find(x => x.id === p.persona) || PERSONAS[4];
                 return (
                   <div key={t.id} className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-2">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-white border border-purple-200 flex items-center justify-center shrink-0">
                         <AvatarRenderer avatar={t.avatar} districtId={t.districtId} size="sm" />
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-xs font-black font-cinzel text-purple-950 truncate">{t.realName}</div>
-                        <div className="text-[10px] font-mono-capitol text-orange-700 font-bold">
-                          {pInfo.icon} {pInfo.label}
-                        </div>
+                      <div className="text-xs font-black font-cinzel text-purple-950 truncate">
+                        Tribute #{idx + 1}
                       </div>
                     </div>
                     <p className="text-xs text-purple-900 italic leading-relaxed">
@@ -87,7 +73,7 @@ export default function Phase5Pitch({
 
           <div className="pt-3 border-t border-purple-100 flex flex-wrap items-center justify-between gap-3">
             <p className="text-[11px] text-purple-500 font-mono-capitol">
-              You can invite tributes to read theirs aloud, then open the anonymous sponsor vote.
+              Next: Tributes vote anonymously on the pitches (names hidden to prevent bias!).
             </p>
             <button
               onClick={onStartVote}
@@ -112,44 +98,14 @@ export default function Phase5Pitch({
 
           {!myPitch ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Optional Personality Selector */}
-              <div className="space-y-2">
-                <div className="text-[11px] font-bold font-mono-capitol uppercase text-purple-700">
-                  Pick a Persona (Optional)
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {PERSONAS.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setPersona(p.id)}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
-                        persona === p.id
-                          ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-200'
-                          : 'bg-purple-50/40 border-purple-200 hover:border-purple-400'
-                      }`}
-                    >
-                      <div className="text-xs font-black text-purple-950">{p.icon} {p.label}</div>
-                      <div className="text-[10px] text-purple-600">{p.tagline}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Guiding prompts */}
-              <div className="text-[11px] text-purple-600 bg-purple-50/60 border border-purple-100 rounded-xl px-3.5 py-2 font-mono-capitol">
-                Ideas: What makes you different? What&apos;s your biggest strength? Why will you survive?
-              </div>
-
-              {/* Pitch Input */}
               <div className="space-y-1.5">
                 <textarea
-                  rows={3}
+                  rows={4}
                   maxLength={220}
                   required
                   value={pitchText}
                   onChange={(e) => setPitchText(e.target.value)}
-                  placeholder="Write your 30-second pitch to win over the Capitol sponsors..."
+                  placeholder="Write your pitch to win over the Capitol sponsors..."
                   className="w-full px-4 py-3 rounded-2xl border-2 border-purple-200 text-sm text-purple-950 focus:outline-none focus:border-orange-500 resize-none"
                 />
                 <div className="text-right text-[10px] font-mono text-purple-400">

@@ -45,19 +45,23 @@ export default function Phase4Outcome({
         )}
       </div>
 
-      {/* Private Personal Score & Breakdown Card (ONLY visible to the current tribute) */}
+      {/* Personal Score & Breakdown Card */}
       {myResult && (
-        <div className="p-4 sm:p-5 rounded-2xl border-2 bg-emerald-50 border-emerald-300 text-emerald-950 shadow-sm space-y-3">
+        <div className={`p-4 sm:p-5 rounded-2xl border-2 shadow-sm space-y-3 ${
+          myResult.p4TimedOut
+            ? 'bg-rose-50 border-rose-300 text-rose-950'
+            : 'bg-emerald-50 border-emerald-300 text-emerald-950'
+        }`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <ShieldCheck className="w-8 h-8 text-emerald-600 shrink-0" />
+              <ShieldCheck className={`w-8 h-8 shrink-0 ${myResult.p4TimedOut ? 'text-rose-600' : 'text-emerald-600'}`} />
               <div>
                 <div className="text-sm sm:text-base font-black font-cinzel">
-                  {myResult.p4TwistAction === 'change'
+                  {myResult.p4TimedOut
+                    ? 'You ran out of time! (-8 marks)'
+                    : myResult.p4TwistAction === 'change'
                     ? 'You pivoted under pressure!'
-                    : myResult.p4TwistAction === 'stick'
-                    ? 'You stood by your original plan!'
-                    : 'You weathered the twist!'}
+                    : 'You stood by your original plan!'}
                 </div>
                 <div className="text-xs opacity-80 font-mono-capitol">
                   Initial: {MOVE_LABELS[myResult.p4InitialMove] || 'None'} • Final: {MOVE_LABELS[myResult.p4FinalMove] || 'None'}
@@ -69,8 +73,10 @@ export default function Phase4Outcome({
               <div className="text-[10px] font-mono-capitol uppercase opacity-75 font-bold">
                 Your Score
               </div>
-              <div className="text-2xl font-black font-mono text-emerald-700">
-                +{myResult.p4RoundPoints ?? 0} pts
+              <div className={`text-2xl font-black font-mono ${
+                (myResult.p4RoundPoints || 0) >= 0 ? 'text-emerald-700' : 'text-rose-700'
+              }`}>
+                {(myResult.p4RoundPoints || 0) >= 0 ? `+${myResult.p4RoundPoints}` : myResult.p4RoundPoints} pts
               </div>
               <div className="text-[11px] font-mono-capitol opacity-80">
                 Total: <strong>{myResult.totalScore ?? 0} pts</strong>
@@ -78,10 +84,9 @@ export default function Phase4Outcome({
             </div>
           </div>
 
-          {myResult.p4Breakdown && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-emerald-200 text-[10px] font-mono-capitol">
+          {!myResult.p4TimedOut && myResult.p4Breakdown && (
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-emerald-200 text-[10px] font-mono-capitol">
               <div className="bg-white/70 rounded-lg px-2 py-1">Initial move: <strong>+{myResult.p4Breakdown.ptsInitial}</strong></div>
-              <div className="bg-white/70 rounded-lg px-2 py-1">Sensible reason: <strong>+{myResult.p4Breakdown.ptsReason}</strong></div>
               <div className="bg-white/70 rounded-lg px-2 py-1">Twist response: <strong>+{myResult.p4Breakdown.ptsAdapt}</strong></div>
               <div className="bg-white/70 rounded-lg px-2 py-1">In countdown: <strong>+{myResult.p4Breakdown.ptsTimer}</strong></div>
             </div>

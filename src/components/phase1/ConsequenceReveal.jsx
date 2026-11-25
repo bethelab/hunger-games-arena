@@ -73,7 +73,7 @@ export default function ConsequenceReveal({
                   )}
                   <h3 className="text-base sm:text-lg font-black font-cinzel">
                     {myResult.survivalStatus === 'eliminated'
-                      ? 'You were eliminated in Phase 1!'
+                      ? 'You fell in Phase 1 (-5 marks)'
                       : 'You survived Phase 1!'}
                   </h3>
                 </div>
@@ -112,7 +112,7 @@ export default function ConsequenceReveal({
               </div>
               {myResult.survivalStatus === 'eliminated' && (
                 <div className="text-[11px] opacity-80 mt-0.5">
-                  You remain in the game for future rounds.
+                  You are NOT eliminated — just -5 marks. You keep playing!
                 </div>
               )}
             </div>
@@ -137,7 +137,7 @@ export default function ConsequenceReveal({
                 </div>
                 <div className="text-xs font-bold mt-0.5">
                   {myResult.survivalStatus === 'eliminated'
-                    ? 'Eliminated (-5 pts) • Still active next round'
+                    ? 'Fell (-5 marks) • Still playing next round'
                     : 'Alive and moving into The Woods'}
                 </div>
               </div>
@@ -232,7 +232,7 @@ export default function ConsequenceReveal({
                       ? 'bg-rose-100 text-rose-700'
                       : 'bg-emerald-100 text-emerald-700'
                   }`}>
-                    {isElim ? 'Eliminated' : 'Alive'}
+                    {isElim ? 'Fallen (-5)' : 'Alive'}
                   </span>
                 </div>
               );

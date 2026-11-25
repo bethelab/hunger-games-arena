@@ -145,14 +145,14 @@ export default function LessonReveal({ isGamemaker, onBackToLobby }) {
                 <div className="p-2.5 rounded-xl bg-white border border-orange-200">
                   <div className="text-lg">⚔️</div>
                   <div className="text-xs font-bold text-purple-950">Cornucopia</div>
-                  <div className="text-[11px] text-orange-700">High Risk (20% base)</div>
-                  <div className="text-[11px] font-mono text-purple-700">+20 pts if alive</div>
+                  <div className="text-[11px] text-orange-700">High Risk (50% base)</div>
+                  <div className="text-[11px] font-mono text-purple-700">+20 pts + Tool if alive</div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-white border border-purple-200">
                   <div className="text-lg">🎒</div>
                   <div className="text-xs font-bold text-purple-950">Outskirts</div>
-                  <div className="text-[11px] text-purple-700">Medium Risk (10% base)</div>
+                  <div className="text-[11px] text-purple-700">Medium Risk (25% base)</div>
                   <div className="text-[11px] font-mono text-purple-700">+16 pts if alive</div>
                 </div>
 
@@ -166,7 +166,7 @@ export default function LessonReveal({ isGamemaker, onBackToLobby }) {
 
               <div className="text-[11px] text-purple-700 space-y-1 font-mono-capitol">
                 <div><strong>Scaled Risk:</strong> Base Risk × (Tributes on Option ÷ Total Tributes)</div>
-                <div><strong>Last-Second Danger:</strong> Deciding in the final 5 seconds adds +3% to +18% elimination risk</div>
+                <div><strong>Last-Second Danger:</strong> Picking Cornucopia or Outskirts in the final 5 seconds significantly increases elimination risk</div>
                 <div><strong>Speed Bonus:</strong> 0–5s (+3) • 6–10s (+2) • 11–20s (+1) • 21+s (+0)</div>
                 <div><strong>Eliminated:</strong> -5 pts (no speed bonus), but you stay in the game!</div>
               </div>

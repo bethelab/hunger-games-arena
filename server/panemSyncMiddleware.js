@@ -1,18 +1,25 @@
 const STRATEGY_CONFIG = {
   cornucopia: {
-    baseRisk: 0.20,
+    baseRisk: 0.50,
     basePoints: 20,
-    supplies: 'Full Cornucopia Pack'
+    supplies: 'Full Cornucopia Pack',
+    tool: {
+      name: 'Survival Tool Kit',
+      icon: '🛠️',
+      effect: 'Water purification tabs & signal flare — helps protect you in later phases!'
+    }
   },
   outskirts: {
-    baseRisk: 0.10,
+    baseRisk: 0.25,
     basePoints: 16,
-    supplies: 'Outskirts Supplies'
+    supplies: 'Outskirts Supplies',
+    tool: null
   },
   woods: {
     baseRisk: 0.0,
     basePoints: 12,
-    supplies: 'Empty-Handed'
+    supplies: 'Empty-Handed',
+    tool: null
   }
 }
 
@@ -253,11 +260,23 @@ export function createPanemSyncMiddleware() {
       const config = STRATEGY_CONFIG[strategy] || STRATEGY_CONFIG.woods
 
       let actualProb = 0
-      if (strategy === 'cornucopia') actualProb = probCornucopia
-      else if (strategy === 'outskirts') actualProb = probOutskirts
-
+      let latePenalty = 0
       const timeRemaining = Math.max(0, gameState.durationSeconds - responseTime)
-      const latePenalty = timeRemaining <= 5 ? ((6 - timeRemaining) / 5) * 0.15 : 0
+
+      if (strategy === 'cornucopia') {
+        actualProb = probCornucopia
+        // Steep last-5-second danger for rushing the Cornucopia late (+6% at 5s left up to +36% at 0s)
+        if (timeRemaining <= 5) {
+          latePenalty = ((6 - timeRemaining) / 5) * 0.30
+        }
+      } else if (strategy === 'outskirts') {
+        actualProb = probOutskirts
+        // Moderate last-5-second danger for lingering at the Outskirts (+3% at 5s left up to +18% at 0s)
+        if (timeRemaining <= 5) {
+          latePenalty = ((6 - timeRemaining) / 5) * 0.15
+        }
+      }
+
       const finalElimProb = Math.min(0.95, actualProb + latePenalty)
 
       const eliminated = finalElimProb > 0 ? Math.random() < finalElimProb : false
@@ -271,6 +290,7 @@ export function createPanemSyncMiddleware() {
         responseTime,
         latePenaltyPct: Math.round(latePenalty * 100),
         supplies: eliminated ? 'Lost in Arena' : config.supplies,
+        arenaTool: !eliminated && config.tool ? config.tool : null,
         survivalStatus: eliminated ? 'eliminated' : 'alive',
         speedBonus,
         roundPoints,
@@ -362,7 +382,9 @@ export function createPanemSyncMiddleware() {
       const baseScore = locPts + purifyPts
 
       const combo = P3_COMBO_RISK[`${loc}:${act}`] || { illnessProb: 0.5, penalty: 6, label: 'Risky' }
-      const gotSick = combo.illnessProb > 0 ? Math.random() < combo.illnessProb : false
+      // Phase 1 Cornucopia Survival Tool Kit halves water contamination illness risk!
+      const effectiveIllnessProb = t.arenaTool ? combo.illnessProb * 0.5 : combo.illnessProb
+      const gotSick = effectiveIllnessProb > 0 ? Math.random() < effectiveIllnessProb : false
       const penaltyApplied = gotSick ? combo.penalty : 0
       const p3RoundPoints = baseScore - penaltyApplied
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0

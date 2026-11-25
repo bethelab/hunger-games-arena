@@ -91,9 +91,8 @@ export default function Phase5Winner({
       {myResult && (
         <div className="w-full p-4 rounded-2xl bg-white border-2 border-purple-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1 text-[10px] font-mono-capitol uppercase text-purple-600">
-              <Lock className="w-3 h-3" />
-              Your Private Phase 5 Score
+            <div className="text-[10px] font-mono-capitol uppercase text-purple-600 font-bold">
+              Phase 5 Score
             </div>
             <div className="text-xs text-purple-800 font-mono-capitol mt-0.5">
               Pitch +{myResult.p5Breakdown?.ptsPitch ?? 0} • Creativity +{myResult.p5Breakdown?.ptsCreative ?? 0} • Persuasion +{myResult.p5Breakdown?.ptsPersuasive ?? 0} • Sponsor +{myResult.p5Breakdown?.ptsSponsor ?? 0}

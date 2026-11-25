@@ -66,9 +66,8 @@ export default function Phase4Outcome({
             </div>
 
             <div className="text-right">
-              <div className="inline-flex items-center gap-1 text-[10px] font-mono-capitol uppercase opacity-75">
-                <Lock className="w-3 h-3" />
-                Your Private Score
+              <div className="text-[10px] font-mono-capitol uppercase opacity-75 font-bold">
+                Your Score
               </div>
               <div className="text-2xl font-black font-mono text-emerald-700">
                 +{myResult.p4RoundPoints ?? 0} pts
@@ -137,10 +136,6 @@ export default function Phase4Outcome({
           <h3 className="text-sm font-black font-cinzel text-purple-950 uppercase tracking-wider">
             Tribute Decisions
           </h3>
-          <span className="text-[11px] font-mono-capitol text-purple-500 flex items-center gap-1">
-            <Lock className="w-3 h-3" />
-            Scores remain private
-          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">

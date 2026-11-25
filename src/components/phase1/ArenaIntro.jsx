@@ -20,7 +20,7 @@ export default function ArenaIntro({ isGamemaker, durationSeconds, tributeCount,
           Phase 1
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <h1 className="text-3xl sm:text-4xl font-black font-cinzel text-purple-950 tracking-wide">
             The Cornucopia
           </h1>
@@ -28,21 +28,9 @@ export default function ArenaIntro({ isGamemaker, durationSeconds, tributeCount,
             The gong is about to sound. At the center of the arena sits the Cornucopia, stocked with supplies.
             When the countdown begins, every tribute must make one split-second decision.
           </p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2">
-          <div className="p-3 rounded-2xl bg-purple-50 border border-purple-100">
-            <div className="text-2xl mb-1">⚔️</div>
-            <div className="text-[11px] font-bold text-purple-900">Cornucopia</div>
-          </div>
-          <div className="p-3 rounded-2xl bg-purple-50 border border-purple-100">
-            <div className="text-2xl mb-1">🎒</div>
-            <div className="text-[11px] font-bold text-purple-900">Outskirts</div>
-          </div>
-          <div className="p-3 rounded-2xl bg-purple-50 border border-purple-100">
-            <div className="text-2xl mb-1">🌲</div>
-            <div className="text-[11px] font-bold text-purple-900">The Woods</div>
-          </div>
+          <p className="text-xs sm:text-sm font-bold text-orange-700 max-w-md mx-auto">
+            Choose carefully — your decision will directly impact your survival and how the rest of the Games turns out.
+          </p>
         </div>
 
         {isGamemaker ? (

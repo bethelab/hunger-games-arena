@@ -112,7 +112,10 @@ export default function ArenaLobby({ currentTribute }) {
           });
         });
       } else {
-        setHasCelebratedEntry(true);
+        // Ensure Gamemaker slot is registered on the server
+        syncService.registerTribute(currentTribute).then(() => {
+          setHasCelebratedEntry(true);
+        });
       }
     }
   }, [currentTribute, hasCelebratedEntry, isGamemaker]);

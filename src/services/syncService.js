@@ -189,28 +189,34 @@ class SyncService {
     this.gameListeners.forEach(fn => fn(this.game));
   }
 
-  // Register tribute onto the next sequential pedestal (1-12)
+  // Register tribute onto the next sequential pedestal (1-12) or claim single Gamemaker slot
   async registerTribute(tribute) {
-    if (tribute.role === 'gamemaker') {
-      tribute.pedestalNumber = null;
-      return tribute;
-    }
-
     try {
       const res = await fetch('/api/tributes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tribute)
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.tributes) {
-          this.tributes = data.tributes;
-          this.notifyTributes();
-          return data.tribute;
-        }
+      const data = await res.json();
+      if (!res.ok) {
+        return { error: data.error || 'Could not register', rejected: true };
       }
+      if (data.game) {
+        this.game = data.game;
+        this.notifyGame();
+      }
+      if (data.tributes) {
+        this.tributes = data.tributes;
+        this.notifyTributes();
+        return data.tribute;
+      }
+      return data.tribute || tribute;
     } catch (e) {}
+
+    if (tribute.role === 'gamemaker') {
+      tribute.pedestalNumber = null;
+      return tribute;
+    }
 
     // Offline fallback
     const current = [...this.tributes];

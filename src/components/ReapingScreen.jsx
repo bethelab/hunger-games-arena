@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DISTRICTS, getRandomDistrict, GAME_EDITION } from '../data/hungerGamesData';
 import { sound } from './SoundEffects';
+import { syncService } from '../services/syncService';
 import { Sparkles, ArrowRight, ArrowLeft, Shuffle, Shield, Crown } from 'lucide-react';
 
 export default function ReapingScreen({ onComplete, initialData }) {
@@ -8,6 +9,7 @@ export default function ReapingScreen({ onComplete, initialData }) {
   const [subStep, setSubStep] = useState(1);
   const [role, setRole] = useState(initialData?.role || 'tribute'); // 'tribute' | 'gamemaker'
   const [realName, setRealName] = useState(initialData?.realName || '');
+  const [gamemakerTaken, setGamemakerTaken] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState(() => {
     return initialData?.districtId 
       ? DISTRICTS.find(d => d.id === initialData.districtId) || DISTRICTS[0]
@@ -15,12 +17,37 @@ export default function ReapingScreen({ onComplete, initialData }) {
   });
   const [isSpinning, setIsSpinning] = useState(false);
 
+  // Enforce single Gamemaker: listen for live game state
+  useEffect(() => {
+    const unsubscribe = syncService.subscribe(null, null, (game) => {
+      const takenByOther = Boolean(game?.gamemakerId && game.gamemakerId !== initialData?.id);
+      setGamemakerTaken(takenByOther);
+      if (takenByOther) {
+        setRole('tribute');
+      }
+    });
+    return () => unsubscribe();
+  }, [initialData?.id]);
+
   // Phase 1 -> Phase 2
-  const handleNameSubmit = (e) => {
+  const handleNameSubmit = async (e) => {
     e.preventDefault();
     if (!realName.trim()) {
       alert("Please enter your name!");
       return;
+    }
+    if (role === 'gamemaker') {
+      const res = await syncService.registerTribute({
+        id: initialData?.id,
+        role: 'gamemaker',
+        realName: realName.trim()
+      });
+      if (res?.rejected) {
+        alert("A Gamemaker is already active in this session. You will join as a Tribute.");
+        setRole('tribute');
+        setGamemakerTaken(true);
+        return;
+      }
     }
     sound.playBeep(true);
     setSubStep(2);
@@ -144,18 +171,23 @@ export default function ReapingScreen({ onComplete, initialData }) {
 
                   <button
                     type="button"
+                    disabled={gamemakerTaken}
                     onClick={() => {
+                      if (gamemakerTaken) return;
                       setRole('gamemaker');
                       sound.playBeep(true);
                     }}
+                    title={gamemakerTaken ? 'A Gamemaker is already in this session' : 'Join as the sole Gamemaker'}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      role === 'gamemaker'
+                      gamemakerTaken
+                        ? 'text-purple-400 opacity-50 cursor-not-allowed'
+                        : role === 'gamemaker'
                         ? 'bg-purple-900 text-white shadow-sm font-black'
                         : 'text-purple-700 hover:text-purple-950'
                     }`}
                   >
                     <span>👑</span>
-                    <span>Gamemaker</span>
+                    <span>{gamemakerTaken ? 'Gamemaker (Taken)' : 'Gamemaker'}</span>
                   </button>
                 </div>
               </div>

@@ -6,7 +6,7 @@ const STRATEGY_CONFIG = {
     tool: {
       name: 'Survival Tool Kit',
       icon: '🛠️',
-      effect: 'Water purification tabs & signal flare — gives you (and your team) a +2 bonus in Phase 3!'
+      effect: 'Water purification tabs & signal flare — could come in handy later in the Games.'
     }
   },
   outskirts: {
@@ -107,6 +107,8 @@ export function createPanemSyncMiddleware() {
     return {
       phase: 'lobby',
       completedPhase: 0,
+      gamemakerId: null,
+      gamemakerName: null,
       durationSeconds: duration,
       votingStartedAt: null,
       // Phase 1
@@ -257,7 +259,7 @@ export function createPanemSyncMiddleware() {
     recomputePoll()
 
     const probCornucopia = STRATEGY_CONFIG.cornucopia.baseRisk * (gameState.poll.cornucopia / totalTributes)
-    const probOutskirts = STRATEGY_CONFIG.outskirts.baseRisk * (gameState.poll.outskirts / totalTributes)
+    const probOutskirts = Math.max(0.10, STRATEGY_CONFIG.outskirts.baseRisk * (gameState.poll.outskirts / totalTributes))
 
     gameState.scaledRisks = {
       cornucopia: Number((probCornucopia * 100).toFixed(1)),
@@ -414,7 +416,10 @@ export function createPanemSyncMiddleware() {
       const sickProbBase = P3_SICK_PROB[`${loc}:${act}`] ?? 0.25
       const teamInfo = t.allianceId ? allianceStats[t.allianceId] : null
       const hasToolBenefit = Boolean(t.arenaTool) || Boolean(teamInfo?.hasPurifyTool)
-      const effectiveSickProb = hasToolBenefit ? sickProbBase * 0.5 : sickProbBase
+      // If they did not filter/purify water at all, they definitely get sick (-2) from contaminated water
+      const effectiveSickProb = act === 'drink'
+        ? 1.0
+        : (hasToolBenefit ? sickProbBase * 0.5 : sickProbBase)
       const gotSick = !died && effectiveSickProb > 0 ? Math.random() < effectiveSickProb : false
 
       const deathPenalty = died ? -5 : 0
@@ -689,9 +694,21 @@ export function createPanemSyncMiddleware() {
         try {
           const tribute = JSON.parse(body)
           if (tribute.role === 'gamemaker') {
+            if (gameState.gamemakerId && gameState.gamemakerId !== tribute.id) {
+              res.statusCode = 409
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({
+                success: false,
+                error: 'A Gamemaker is already active in this session.'
+              }))
+              return
+            }
+            gameState.gamemakerId = tribute.id
+            gameState.gamemakerName = tribute.realName || 'Gamemaker'
             tribute.pedestalNumber = null
+            broadcast('game', gameState)
             res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ success: true, tribute, tributes }))
+            res.end(JSON.stringify({ success: true, tribute, tributes, game: gameState }))
             return
           }
 

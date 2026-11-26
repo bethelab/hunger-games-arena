@@ -25,7 +25,7 @@ export default function ArenaIntro({ isGamemaker, durationSeconds, tributeCount,
             The Cornucopia
           </h1>
           <p className="text-sm sm:text-base text-purple-700 max-w-lg mx-auto leading-relaxed">
-            The gong is about to sound. At the center of the arena sits the Cornucopia, stocked with supplies.
+            At the center of the arena sits the Cornucopia, stocked with supplies.
             When the countdown begins, every tribute must make one split-second decision.
           </p>
           <p className="text-xs sm:text-sm font-bold text-orange-700 max-w-md mx-auto">

@@ -82,6 +82,7 @@ export function createPanemSyncMiddleware() {
       gamemakerName: keepGamemaker?.gamemakerName || null,
       resetToken: keepGamemaker?.resetToken || 0,
       selectedLessonIndex: 0, // Gamemaker picks which 1 of the 3 papers is featured on takeaway slides
+      takeawaySlideIndex: 0,  // Synced slide index within a multi-slide takeaway presentation
       durationSeconds: duration,
       votingStartedAt: null,
       // Phase 1
@@ -845,6 +846,10 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'select_lesson_topic') {
             const safeIdx = Math.max(0, Math.min(2, parseInt(index, 10) || 0))
             gameState.selectedLessonIndex = safeIdx
+            gameState.takeawaySlideIndex = 0
+          } else if (action === 'set_takeaway_slide') {
+            const safeSlide = Math.max(0, Math.min(10, parseInt(index, 10) || 0))
+            gameState.takeawaySlideIndex = safeSlide
           } else if (action === 'start_intro') {
             gameState.phase = 'intro'
             gameState.choices = {}
@@ -870,6 +875,7 @@ export function createPanemSyncMiddleware() {
             gameState.phase = 'consequences'
           } else if (action === 'show_lesson') {
             gameState.selectedLessonIndex = 0
+            gameState.takeawaySlideIndex = 0
             gameState.phase = 'lesson'
           } else if (action === 'back_to_lobby') {
             timerState.running = false

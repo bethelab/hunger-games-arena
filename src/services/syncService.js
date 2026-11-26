@@ -9,6 +9,7 @@ const DEFAULT_GAME_STATE = {
   slideIndex: 0,
   completedPhase: 0,
   selectedLessonIndex: 0,
+  takeawaySlideIndex: 0,
   durationSeconds: 30,
   votingStartedAt: null,
   choices: {},

@@ -582,7 +582,9 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
         <LessonReveal
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
+          takeawaySlideIndex={game?.takeawaySlideIndex ?? 0}
           onSelectTopic={handleSelectLessonTopic}
+          onChangeTakeawaySlide={(idx) => syncService.controlGame('set_takeaway_slide', undefined, { index: idx })}
           onBackToLobby={handleBackToLobby}
         />
       )}

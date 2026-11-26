@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AvatarRenderer from '../AvatarRenderer';
 import { DISTRICTS } from '../../data/hungerGamesData';
-import { Skull, ShieldCheck, ArrowRight, Package, Wrench } from 'lucide-react';
+import { Skull, ShieldCheck, ArrowRight, Package, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
 
 const STRATEGY_LABELS = {
   cornucopia: { name: 'Cornucopia', icon: '⚔️' },
@@ -17,6 +17,8 @@ export default function ConsequenceReveal({
   scaledRisks,
   onShowLesson
 }) {
+  const [showScoring, setShowScoring] = useState(false);
+
   const myResult = !isGamemaker
     ? tributes.find(t => t.id === currentTribute?.id)
     : null;
@@ -242,6 +244,26 @@ export default function ConsequenceReveal({
           <p className="text-xs text-purple-500 font-mono-capitol text-center py-3">
             No other tributes in the arena yet.
           </p>
+        )}
+      </div>
+
+      {/* ================= SCORING & RISK MECHANICS ================= */}
+      <div className="bg-white rounded-3xl border border-purple-200 p-4 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setShowScoring(!showScoring)}
+          className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-xs font-bold font-mono text-purple-800 transition-colors"
+        >
+          <span>Scoring &amp; Risk Mechanics</span>
+          {showScoring ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+
+        {showScoring && (
+          <div className="mt-2.5 p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 text-[11px] text-purple-900 space-y-1 font-mono">
+            <div><strong>But what makes us choose one option over another?</strong></div>
+            <div><strong>Cornucopia:</strong> +20 pts + Tool (50% base risk) • <strong>Outskirts:</strong> +16 pts (25% base, 10% min) • <strong>Woods:</strong> +12 pts (0% risk)</div>
+            <div><strong>Speed Bonus:</strong> 0–5s (+3) • 6–10s (+2) • 11–20s (+1) • <strong>Fallen:</strong> -5 marks (still playing!)</div>
+          </div>
         )}
       </div>
 

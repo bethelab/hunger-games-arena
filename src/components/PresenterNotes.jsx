@@ -1,7 +1,93 @@
 import React, { useState, useEffect } from 'react';
 import { syncService } from '../services/syncService';
 import { DISTRICTS } from '../data/hungerGamesData';
-import { BookOpen, Users, Timer, Pause, Play, ExternalLink } from 'lucide-react';
+import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PHASE1_SPEAKER_SLIDES = [
+  {
+    title: 'Slide 1: Title & The Central Question (~45 seconds)',
+    visual: 'Decision Making Under Time Pressure: A Prospect Theory Approach — Young, Goodie, Hall, & Wu (2012, OBHDP).',
+    script: [
+      '"We make choices under deadlines every day—from quick market trades and urgent project calls to emergency responses. Earlier decision research gave us two clashing stories about what deadlines do to risk: one camp argued time pressure makes people more cautious and risk-averse, while another—like Busemeyer’s sequential-comparison work—suggested people become more risk-seeking when expected value is positive, and more risk-averse when it’s negative."',
+      '"In this 2012 study, Young, Goodie, Hall, and Wu tested how time pressure shapes risk by fitting participants’ certainty equivalents into a formal prospect theory model—separating how we value outcomes from how we weight probabilities."'
+    ]
+  },
+  {
+    title: 'Slide 2: Experimental Setup & Model (~60 seconds)',
+    visual: 'Modified Georgia Gambling Task + Prospect Theory parameters: risk attractiveness, probability discriminability, and outcome utility.',
+    script: [
+      '"Across three experiments with undergraduate participants, the researchers compared an unlimited-time group against a time-pressure group—giving 10 seconds on the first screen of a narrowing-down task and 5 seconds on each follow-up screen. Time pressure worked: participants responded roughly twice as fast and violated the clock on only a small fraction of bets."',
+      '"Using nonlinear mixed-effects modeling on certainty equivalents, the authors tracked three psychological mechanisms: risk attractiveness (elevation of probability weighting), probability discriminability (sensitivity to differences in probability), and outcome utility (how sharply value changes with payoff size). They tested gains-only bets using both random odds and U.S. state population confidence wagers, and then tested loss-only bets."'
+    ]
+  },
+  {
+    title: 'Slide 3: Gains Domain — Experiments 1 & 2 (~75 seconds)',
+    visual: 'Gains-Only Bets (Experiments 1 & 2): Higher risk attractiveness under time pressure; no main-effect shift in probability discriminability or value curvature.',
+    script: [
+      '"In Experiment 1, participants faced gains-only bets across higher win probabilities—from 51% to 99%—with real-money payout potential. Under time pressure, risk attractiveness increased significantly, both overall and on random bets alone, while outcome utility and overall probability discriminability did not shift significantly at the main-effect level."',
+      '"Experiment 2 broadened the probability range down below 50% using six-state population comparisons and hypothetical stakes. Again, time pressure increased overall risk attractiveness across the wider probability spectrum—showing the pattern holds across both real and hypothetical incentives, though with one twist: in the random condition without time pressure, participants showed higher probability discriminability than under time pressure."'
+    ]
+  },
+  {
+    title: 'Slide 4: Losses Domain — Experiment 3 (~60 seconds)',
+    visual: 'Loss-Only Bets (Experiment 3): Steep risk-seeking in both groups; lower probability discriminability under time pressure.',
+    script: [
+      '"What happens when the framing flips to pure losses? In Experiment 3, participants estimated how much they’d pay to avoid loss-only gambles—backed by cash endowments and real loss risk."',
+      '"Here, participants in both conditions showed strong risk-seeking behavior—reflected in elevated probability weighting curves and willingness to gamble rather than pay out—which may have created a ceiling effect that masked any extra shift in risk attractiveness. Crucially, however, time pressure significantly reduced probability discriminability, meaning stressed participants were less sensitive to differences across loss probabilities."'
+    ]
+  },
+  {
+    title: 'Slide 5: Limitations & Wrap-Up (~45 seconds)',
+    visual: 'Key caveats: Hypothetical stakes in Exp. 2, narrowing/matching elicitation vs. direct choice, and a shared 3-station lab room.',
+    script: [
+      '"A few caveats matter when reading these numbers: Experiment 2 used hypothetical stakes, the task used a narrowing-down matching format rather than simple binary choice, and sessions ran in a shared three-workstation room where subtle social dynamics could play a role."',
+      '"Overall, the paper shows that time pressure doesn’t just speed us up—it shifts specific cognitive levers depending on whether we’re looking at potential gains or potential losses."'
+    ]
+  }
+];
+
+const PHASE1_MAIN_TAKEAWAYS = [
+  {
+    heading: 'Deadlines boost risk attractiveness for gains',
+    text: 'Across both narrow (51%–99%) and broad probability ranges—and with real or hypothetical stakes—time pressure made gains-framed risks look more attractive without changing outcome utility at the main-effect level.'
+  },
+  {
+    heading: 'Deadlines blunt probability sensitivity for losses',
+    text: 'In loss-framed gambles, extreme baseline risk-seeking appeared in both groups, while time pressure impaired how well participants discriminated between probabilities.'
+  },
+  {
+    heading: 'Time pressure acts selectively rather than uniformly',
+    text: 'Rather than simply making people universally more reckless or more cautious, deadlines affect distinct prospect-theory mechanisms differently across the gains and losses domains.'
+  }
+];
+
+const LESSON_PAPER_OPTIONS = {
+  lesson: [
+    '1. Time Pressure (Young, Goodie, Hall, & Wu, 2012)',
+    '2. Risk Perception (Perlstein, 2023)',
+    '3. Social Influence (Bergquist & Ekelund, 2025)'
+  ],
+  p2_lesson: [
+    '1. Cooperation & Social Dilemmas (Lo Iacono et al., 2024)',
+    '2. Social Identity & Group Loyalty (Imada et al., 2024)',
+    '3. Trust (Composto et al., 2025)'
+  ],
+  p3_lesson: [
+    '1. Present Bias (Taş, Maknoon & Rezaei, 2026)',
+    '2. Risk Perception (Perlstein, 2023)',
+    '3. Effort & Reward Value (Campbell, Wang & Inzlicht, 2025)'
+  ],
+  p4_lesson: [
+    '1. Cognitive Flexibility (Egner & Siqi-Liu, 2024)',
+    '2. Stress & Decision-Making (Doroc, Yadav & Murawski, 2025)',
+    '3. Escalation of Commitment (2025 Review)'
+  ],
+  p5_lesson: [
+    '1. Halo Effect (Mattavelli et al., 2026)',
+    '2. Elaboration Likelihood Model (Petty, 2021)',
+    '3. First Impressions (Swider et al., 2026)'
+  ]
+};
 
 const PHASE_NOTES = {
   lobby: {
@@ -18,7 +104,7 @@ const PHASE_NOTES = {
     goal: 'Build suspense without revealing the 3 options yet.',
     bullets: [
       'Remind tributes: every decision impacts how the rest of the Games turns out.',
-      'Set the countdown seconds (30s works well for ~10 people) and sound the gong.'
+      'Set the countdown seconds (30s works well for ~10 people) and start the round.'
     ],
     papers: []
   },
@@ -28,7 +114,7 @@ const PHASE_NOTES = {
     bullets: [
       'Cornucopia: 50% base risk (+20 pts + Survival Tool Kit if alive); steep last-5-second penalty.',
       'Outskirts: 25% base risk (min 10% floor, +16 pts); moderate last-5-second penalty.',
-      'Woods: 0% risk (+12 pts guaranteed).'
+      'Woods: 0% risk (+12 pts guaranteed). Timeout = automatic death (-2 pts).'
     ],
     papers: []
   },
@@ -51,32 +137,14 @@ const PHASE_NOTES = {
     papers: []
   },
   lesson: {
-    title: 'Phase 1 Teaching Notes — Risk vs Reward',
-    goal: 'Connect the Cornucopia choices to modern risk, social influence, and loss aversion research.',
-    bullets: [
-      'When tributes decide whether to rush the Cornucopia, they weigh rewards (+20 + Tool) against losses (-5).',
-      'Under uncertainty and time pressure, what others appear to be doing pulls our choices — even when crowding raises danger.'
-    ],
-    papers: [
-      {
-        concept: 'Risk perception',
-        cite: 'Perlstein (2023)',
-        note: 'Systematic review showing risk judgments are shaped by social discussion and how people interpret danger.',
-        url: 'https://scholar.google.com/scholar?q=Perlstein+2023+Risk+perception+and+interpersonal+discussion+on+risk'
-      },
-      {
-        concept: 'Social influence',
-        cite: 'Bergquist & Ekelund (2025)',
-        note: 'Emotion regulation & normative influence under uncertainty — social norms pull hardest when outcomes are uncertain.',
-        url: 'https://scholar.google.com/scholar?q=Bergquist+Ekelund+2025+role+of+emotion+regulation+in+normative+influence+under+uncertainty'
-      },
-      {
-        concept: 'Loss aversion',
-        cite: 'Li et al. (2024)',
-        note: 'Psychological & neural representations of loss aversion in social conformity — fear of losing (-5) outweighs equivalent gains.',
-        url: 'https://scholar.google.com/scholar?q=Li+2024+role+of+loss+aversion+in+social+conformity'
-      }
-    ]
+    title: 'Phase 1 Teaching Notes — Decision Making Under Time Pressure',
+    paperLink: {
+      label: 'Young, Goodie, Hall, & Wu (2012, OBHDP) — PMC3375992',
+      url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC3375992/'
+    },
+    speakerSlides: PHASE1_SPEAKER_SLIDES,
+    mainTakeaways: PHASE1_MAIN_TAKEAWAYS,
+    papers: []
   },
   p2_intro: {
     title: 'Phase 2 — Alliances vs Going Solo (Announcement)',
@@ -189,26 +257,26 @@ const PHASE_NOTES = {
   },
   p4_intro: {
     title: "Phase 4 — Gamemakers' Twist (Announcement)",
-    goal: 'Set up the turning point: "You are not in control of this arena. We are."',
-    bullets: ['Not responding before time runs out costs -8 pts!'],
+    goal: 'Set up the turning point: Fire Disaster followed by The Feast.',
+    bullets: ['Timeout = automatic death (-2 pts)!'],
     papers: []
   },
   p4_event: {
-    title: 'Phase 4 — Wall of Fire (Initial Move)',
-    goal: 'Solo players see Stay / River; alliances also see Find Your Alliance.',
-    bullets: ['Next step triggers a random twist (Fire / Weather / Alliance / Resources) with a 15-second rethink.'],
+    title: 'Phase 4 — Fire Disaster',
+    goal: 'Watch who moves downhill (+4), climbs a tree (-3 / 60% death), or ditches gear (+5).',
+    bullets: ['Next step triggers The Feast scenario.'],
     papers: []
   },
   p4_twist: {
-    title: 'Phase 4 — Random Twist (15s Rethink)',
-    goal: 'Watch who sticks with their original plan vs pivots.',
-    bullets: ['Both sticking and changing earn full adaptation points as long as they respond in time!'],
+    title: 'Phase 4 — The Feast',
+    goal: 'Watch who skips (+5), scouts (+1), or sprints for their pack (+3 & +1 vote, or 50% death -5).',
+    bullets: ['Remind players: high reward comes with real risk!'],
     papers: []
   },
   p4_outcome: {
-    title: 'Phase 4 — Adaptation Outcomes',
-    goal: 'Compare % who stuck vs % who changed plan.',
-    bullets: ['Anyone who froze and timed out lost -8 pts.'],
+    title: 'Phase 4 — Fire & Feast Outcomes',
+    goal: 'Compare survival rates across Fire Disaster and The Feast.',
+    bullets: ['Anyone who timed out automatically died (-2 pts).'],
     papers: []
   },
   p4_lesson: {
@@ -247,13 +315,13 @@ const PHASE_NOTES = {
   },
   p5_pitch: {
     title: 'Phase 5 — Sponsor Pitches',
-    goal: 'Wait for pitches to come in, then open anonymous voting.',
+    goal: 'Wait for pitches to come in, then set the voting duration and open anonymous voting.',
     bullets: ['Names will be hidden (Tribute A, B, C...) during voting so everyone votes purely on the pitch.'],
     papers: []
   },
   p5_vote: {
     title: 'Phase 5 — Anonymous Sponsor Voting',
-    goal: 'Track live votes cast (nobody can vote for themselves).',
+    goal: 'Track live votes cast (nobody can vote for themselves; not voting costs -4 pts).',
     bullets: ['1st: +5 pts | 2nd: +3 pts | 3rd: +1 pt (sponsor score only).'],
     papers: []
   },
@@ -320,13 +388,23 @@ export default function PresenterNotes() {
   const phase = game?.phase || 'lobby';
   const notes = PHASE_NOTES[phase] || PHASE_NOTES.lobby;
   const sortedTributes = [...tributes].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+  const lessonPaperOptions = LESSON_PAPER_OPTIONS[phase] || null;
+  const activeSlideIdx = game?.takeawaySlideIndex ?? 0;
 
   const handleToggleTimer = () => {
     syncService.controlTimer(timer.running ? 'pause' : 'start', timer.duration || 30);
   };
 
+  const handleSelectPaper = (idx) => {
+    syncService.controlGame('select_lesson_topic', undefined, { index: idx });
+  };
+
+  const handleChangeTakeawaySlide = (idx) => {
+    syncService.controlGame('set_takeaway_slide', undefined, { index: idx });
+  };
+
   return (
-    <div className="min-h-screen bg-[#1E1030] text-purple-50 p-4 sm:p-6">
+    <div className="min-h-screen bg-[#16062A] text-purple-50 p-4 sm:p-6">
       <div className="max-w-5xl mx-auto space-y-5">
         {/* Top Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-purple-800">
@@ -340,7 +418,20 @@ export default function PresenterNotes() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {lessonPaperOptions && (
+              <select
+                aria-label="Select presented paper"
+                value={game?.selectedLessonIndex ?? 0}
+                onChange={(e) => handleSelectPaper(parseInt(e.target.value, 10) || 0)}
+                className="px-2.5 py-1.5 rounded-xl bg-purple-900 border border-orange-400/50 text-xs font-mono text-orange-200 focus:outline-none cursor-pointer"
+                title="Silently switch which paper is shown on the shared screen"
+              >
+                {lessonPaperOptions.map((label, idx) => (
+                  <option key={label} value={idx}>{label}</option>
+                ))}
+              </select>
+            )}
             <div className="px-3 py-1.5 rounded-xl bg-purple-900 border border-purple-700 flex items-center gap-2 font-mono text-sm font-black text-orange-300">
               <Timer className="w-4 h-4" />
               <span>{timer.countdown}s</span>
@@ -360,23 +451,125 @@ export default function PresenterNotes() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left: Speaking & Teaching Notes */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3">
-              <div className="text-xs font-mono uppercase font-bold text-orange-400">
-                Goal for This Screen
-              </div>
-              <p className="text-sm text-purple-100 leading-relaxed font-semibold">
-                {notes.goal}
-              </p>
+            {/* Multi-Slide Speaker Script Mode (Phase 1 Psychology Takeaway) */}
+            {notes.speakerSlides ? (
+              <div className="space-y-4">
+                {/* Slide Controls + Paper Link */}
+                <div className="p-4 rounded-2xl bg-purple-950/90 border border-orange-400/40 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-mono uppercase font-bold text-orange-400">
+                      Synced Presentation Controls
+                    </div>
+                    {notes.paperLink && (
+                      <a
+                        href={notes.paperLink.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-mono text-orange-200 hover:text-white underline mt-0.5"
+                      >
+                        <span>{notes.paperLink.label}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
 
-              <ul className="space-y-2 pt-2 border-t border-purple-800/80 text-xs sm:text-sm text-purple-200">
-                {notes.bullets.map((b, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-orange-400 font-bold">•</span>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={activeSlideIdx <= 0}
+                      onClick={() => handleChangeTakeawaySlide(activeSlideIdx - 1)}
+                      className="px-2.5 py-1.5 rounded-xl bg-purple-900 hover:bg-purple-800 border border-purple-700 text-xs font-bold disabled:opacity-30 inline-flex items-center gap-1"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      Prev
+                    </button>
+                    <span className="text-xs font-mono font-bold text-orange-300">
+                      Slide {activeSlideIdx + 1} / {notes.speakerSlides.length}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={activeSlideIdx >= notes.speakerSlides.length - 1}
+                      onClick={() => handleChangeTakeawaySlide(activeSlideIdx + 1)}
+                      className="px-2.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold disabled:opacity-30 inline-flex items-center gap-1"
+                    >
+                      Next
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* All 5 Slides with Active Slide Highlighted */}
+                {notes.speakerSlides.map((slide, idx) => {
+                  const isActive = idx === activeSlideIdx;
+                  return (
+                    <div
+                      key={slide.title}
+                      onClick={() => handleChangeTakeawaySlide(idx)}
+                      className={`p-5 rounded-2xl border transition-all cursor-pointer space-y-2.5 ${
+                        isActive
+                          ? 'bg-purple-900/90 border-2 border-orange-400 shadow-lg'
+                          : 'bg-purple-950/80 border-purple-800 opacity-75 hover:opacity-100'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs sm:text-sm font-black text-orange-300 font-cinzel">
+                          {slide.title}
+                        </span>
+                        {isActive && (
+                          <span className="px-2 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-mono font-bold uppercase shrink-0">
+                            On Screen
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] font-mono text-purple-300 bg-purple-950/70 px-3 py-1.5 rounded-lg border border-purple-800/80">
+                        <strong className="text-orange-200">Slide visual:</strong> {slide.visual}
+                      </div>
+                      <div className="space-y-2 text-xs sm:text-sm text-purple-100 leading-relaxed">
+                        {slide.script.map((para, pIdx) => (
+                          <p key={pIdx}>{para}</p>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* 3 Main Takeaways */}
+                {notes.mainTakeaways && (
+                  <div className="p-5 rounded-2xl bg-purple-950/90 border border-orange-400/50 space-y-3">
+                    <div className="text-xs font-mono uppercase font-bold text-orange-400">
+                      3 Main Takeaways
+                    </div>
+                    <div className="space-y-2.5">
+                      {notes.mainTakeaways.map((item, idx) => (
+                        <div key={idx} className="p-3 rounded-xl bg-purple-900/70 border border-purple-800 text-xs text-purple-100 leading-relaxed">
+                          <strong className="text-orange-300 block mb-0.5">{idx + 1}. {item.heading}:</strong>
+                          {item.text}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Standard Goal + Bullets Mode for Other Phases */
+              <div className="p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3">
+                <div className="text-xs font-mono uppercase font-bold text-orange-400">
+                  Goal for This Screen
+                </div>
+                <p className="text-sm text-purple-100 leading-relaxed font-semibold">
+                  {notes.goal}
+                </p>
+
+                <ul className="space-y-2 pt-2 border-t border-purple-800/80 text-xs sm:text-sm text-purple-200">
+                  {notes.bullets.map((b, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-orange-400 font-bold">•</span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {notes.papers.length > 0 && (
               <div className="p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3">
@@ -407,7 +600,7 @@ export default function PresenterNotes() {
           </div>
 
           {/* Right: Live Private Tribute Monitor */}
-          <div className="lg:col-span-5 p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3">
+          <div className="lg:col-span-5 p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3 self-start">
             <div className="flex items-center justify-between">
               <div className="text-xs font-mono uppercase font-bold text-orange-400 flex items-center gap-1.5">
                 <Users className="w-4 h-4" />
@@ -423,7 +616,7 @@ export default function PresenterNotes() {
                 const p2 = game?.p2Choices?.[t.id];
                 const p3L = game?.p3Locations?.[t.id];
                 const p3A = game?.p3Actions?.[t.id];
-                const p4 = game?.p4Initial?.[t.id];
+                const p4 = game?.p4Fire?.[t.id];
                 return (
                   <div key={t.id} className="p-3 rounded-xl bg-purple-900/60 border border-purple-800 text-xs space-y-1">
                     <div className="flex items-center justify-between gap-2">
@@ -440,7 +633,7 @@ export default function PresenterNotes() {
                       {p1 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P1: {p1.strategy} ({p1.responseTime}s)</span>}
                       {p2 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P2: {p2.choice}</span>}
                       {p3L && <span className="px-1.5 py-0.5 rounded bg-purple-800">P3: {p3L}{p3A ? `/${p3A}` : ''}</span>}
-                      {p4 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P4: {p4.move}</span>}
+                      {p4 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P4: {p4}</span>}
                     </div>
                   </div>
                 );

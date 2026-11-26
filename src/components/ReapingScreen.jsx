@@ -207,7 +207,7 @@ export default function ReapingScreen({ onComplete, initialData }) {
                   autoFocus
                   value={realName}
                   onChange={(e) => setRealName(e.target.value)}
-                  placeholder="e.g. Marcus, Maya..."
+                  placeholder="e.g. John, Jane..."
                   className="w-full px-4 py-3.5 rounded-xl bg-purple-50/60 border-2 border-purple-200 focus:border-orange-500 focus:bg-white text-purple-950 placeholder-purple-400 text-base font-semibold outline-none transition-all shadow-inner"
                   required
                 />

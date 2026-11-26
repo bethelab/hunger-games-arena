@@ -83,6 +83,7 @@ export function createPanemSyncMiddleware() {
       resetToken: keepGamemaker?.resetToken || 0,
       selectedLessonIndex: 0, // Gamemaker picks which 1 of the 3 papers is featured on takeaway slides
       takeawaySlideIndex: 0,  // Synced slide index within a multi-slide takeaway presentation
+      takeawayHidden: false,  // Gamemaker can hide takeaway content from players (private preview vs visible)
       durationSeconds: duration,
       votingStartedAt: null,
       // Phase 1
@@ -850,6 +851,8 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'set_takeaway_slide') {
             const safeSlide = Math.max(0, Math.min(10, parseInt(index, 10) || 0))
             gameState.takeawaySlideIndex = safeSlide
+          } else if (action === 'toggle_takeaway_hidden') {
+            gameState.takeawayHidden = !gameState.takeawayHidden
           } else if (action === 'start_intro') {
             gameState.phase = 'intro'
             gameState.choices = {}
@@ -876,6 +879,7 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'show_lesson') {
             gameState.selectedLessonIndex = 0
             gameState.takeawaySlideIndex = 0
+            gameState.takeawayHidden = false
             gameState.phase = 'lesson'
           } else if (action === 'back_to_lobby') {
             timerState.running = false
@@ -917,6 +921,8 @@ export function createPanemSyncMiddleware() {
             gameState.phase = 'p2_alliances'
           } else if (action === 'show_p2_lesson') {
             gameState.selectedLessonIndex = 0
+            gameState.takeawaySlideIndex = 0
+            gameState.takeawayHidden = false
             gameState.phase = 'p2_lesson'
           } else if (action === 'start_p3_intro') {
             const p3Secs = typeof durationSeconds === 'number' ? durationSeconds : 30
@@ -959,6 +965,8 @@ export function createPanemSyncMiddleware() {
             gameState.phase = 'p3_outcome'
           } else if (action === 'show_p3_lesson') {
             gameState.selectedLessonIndex = 0
+            gameState.takeawaySlideIndex = 0
+            gameState.takeawayHidden = false
             gameState.phase = 'p3_lesson'
           } else if (action === 'start_p4_intro') {
             const p4Secs = typeof durationSeconds === 'number' ? durationSeconds : 30
@@ -991,6 +999,8 @@ export function createPanemSyncMiddleware() {
             gameState.phase = 'p4_outcome'
           } else if (action === 'show_p4_lesson') {
             gameState.selectedLessonIndex = 0
+            gameState.takeawaySlideIndex = 0
+            gameState.takeawayHidden = false
             gameState.phase = 'p4_lesson'
           } else if (action === 'start_p5_intro') {
             const p5Secs = typeof durationSeconds === 'number' ? durationSeconds : 60
@@ -1030,6 +1040,8 @@ export function createPanemSyncMiddleware() {
             gameState.phase = 'p5_winner'
           } else if (action === 'show_p5_lesson') {
             gameState.selectedLessonIndex = 0
+            gameState.takeawaySlideIndex = 0
+            gameState.takeawayHidden = false
             gameState.phase = 'p5_lesson'
           } else if (action === 'show_finale') {
             timerState.running = false

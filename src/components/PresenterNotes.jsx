@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { syncService } from '../services/syncService';
 import { DISTRICTS } from '../data/hungerGamesData';
-import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 
 const PHASE1_SPEAKER_SLIDES = [
   {
@@ -58,6 +58,57 @@ const PHASE1_MAIN_TAKEAWAYS = [
   {
     heading: 'Time pressure acts selectively rather than uniformly',
     text: 'Rather than simply making people universally more reckless or more cautious, deadlines affect distinct prospect-theory mechanisms differently across the gains and losses domains.'
+  }
+];
+
+const PHASE3_SPEAKER_SLIDES = [
+  {
+    title: '1. Hook & Why Time Distorts Choice (~45 seconds)',
+    visual: "Time's Influence: A Systematic Review of Biases in Intertemporal Decision-Making — Taş, Maknoon, & Rezaei (2026, Annual Review of Psychology).",
+    script: [
+      '"Think about a decision you made recently where a smaller reward or easier option right now competed with a bigger payoff later—putting off a workout, buying something on impulse, or underestimating how long a project would take. Classical economics assumes we discount the future at a steady, rational rate and stick to consistent preferences over time."',
+      '"In their 2026 Annual Review of Psychology paper, \'Time\'s Influence: A Systematic Review of Biases in Intertemporal Decision-Making,\' Pelin Gülüm Taş, Yousef Maknoon, and Jafar Rezaei examine why real human choices drift off course. After screening bias taxonomies and reviewing 215 peer-reviewed empirical human studies across Web of Science and Scopus, they organize the literature around six time-related biases that warp how we perceive time, value outcomes, and make trade-offs."'
+    ]
+  },
+  {
+    title: '2. The Six Time-Related Biases (~2 minutes)',
+    visual: 'Six biases across 215 studies: Present (78), Impact (37), Duration Neglect (25), Planning Fallacy (25), Projection (18), Recency (7).',
+    script: [
+      '"The first two biases center on how we weight now versus later and how we project today onto tomorrow. Present bias—the most studied in the review with 78 empirical papers—is our pull toward immediate rewards or relief over larger future gains. It shows up in credit card debt, delayed smoking cessation, lower uptake of preventive screenings, and reluctance to pay upfront for energy-efficient appliances or solar panels. Projection bias (18 studies) happens when we assume our current tastes, emotions, or physical conditions—like hunger, cold weather, or poor air quality—will carry unchanged into the future, or when we project our own preferences onto others, such as estimating a partner\'s end-of-life care wishes."',
+      '"The next two biases involve how sequence and duration shape memory and evaluation. Recency bias (7 studies) gives outsized weight to the most recent information or events—like lowering risk tolerance after a market drop or basing crop insurance choices on recent weather. Duration neglect (25 studies) means we judge an experience largely by its most intense moment and its ending—the peak-end rule—rather than its total length. That affects voter reactions, travel memories, student interest, and even medical screenings, where adding a less painful final step can improve pain recall and return rates."',
+      '"Finally, two biases distort how we forecast feelings and effort ahead. Impact bias (37 studies) leads us to overestimate how intensely and how long we will feel emotions in the future, driven by focalism—narrowly fixating on one event—and immune neglect, or underestimating our psychological coping and adaptation. And the planning fallacy (25 studies) leads us to underestimate the time, cost, effort, and risks of future tasks due to overoptimism."'
+    ]
+  },
+  {
+    title: '3. Interrelationships & Mitigation Strategies (~1 minute 15 seconds)',
+    visual: 'Bias overlaps (loss aversion, salience, anchoring, optimism) + tailored mitigation toolkits.',
+    script: [
+      '"A major contribution of this review is mapping how these biases overlap with each other and with broader behavioral factors. Present bias frequently pairs with loss aversion or risk aversion; projection bias overlaps with salience and optimism bias; recency bias aligns with anchoring; impact bias interacts with hot-cold empathy gaps and recollection or hindsight biases; and the planning fallacy travels closely with optimism, memory, and anchoring biases—while standing apart from direct co-occurrence with the other five time-related biases in the reviewed studies."',
+      '"Because these distortions carry real personal and societal costs, the authors catalog mitigation strategies tailored to each bias. For present and projection biases, precommitment devices, waiting or cooling-off periods, loss or future-date framing, episodic future thinking (mentally simulating concrete future scenarios), incentives, and joint decision-making help counter short-term pull. For recency bias and the planning fallacy, accountability, reversing evaluation order, unpacking tasks into smaller steps, backward planning, checking past reference data, and taking an outside third-person perspective add realism. For duration neglect and impact bias, reordering sequences, spacing evaluations, using surrogate experiences from people who went through similar events, considering multiple co-occurring events, and building emotional intelligence help broaden perspective."'
+    ]
+  },
+  {
+    title: '4. Research Gaps & Closing (~45 seconds)',
+    visual: 'Descriptive vs. prescriptive gap + 3 Main Takeaways.',
+    script: [
+      '"At the same time, Taş, Maknoon, and Rezaei point out a clear imbalance in the literature: most studies are descriptive rather than prescriptive, and we still lack well-tested mitigation tools tailored to specific contexts or capable of separating overlapping biases. Future work needs stronger real-world experiments, clearer ways to distinguish interacting biases, and better policy and decision tools."',
+      '"If you take away just three points from this review: first, six distinct time-related biases systematically bend intertemporal choices; second, they reshape everyday decisions in finance, health, environment, and planning—often alongside other biases; and third, targeted tools like waiting periods, mental simulation, backward planning, and outside perspectives can help, though prescriptive testing still has room to grow."'
+    ]
+  }
+];
+
+const PHASE3_MAIN_TAKEAWAYS = [
+  {
+    heading: 'Human choices violate constant discounting across six distinct time biases',
+    text: 'Rather than weighting future costs and benefits smoothly over time, people bend decisions around immediate gratification (present bias), current states or weather (projection bias), recent events (recency bias), peaks and endings (duration neglect), distorted emotional forecasts (impact bias), and optimistic schedules (planning fallacy).'
+  },
+  {
+    heading: 'Biases compound and distort high-stakes domains',
+    text: 'Synthesizing 215 empirical studies, the review shows these biases shape personal debt, health screening and lifestyle habits, green technology adoption, voting, and project timelines—often interacting with broader factors like loss aversion, salience, anchoring, and optimism bias.'
+  },
+  {
+    heading: 'Effective mitigation requires shifting friction, framing, and perspective—and the field needs more prescriptive testing',
+    text: 'Tools like precommitment devices, cooling-off/waiting periods, episodic future thinking, backward planning, and outside perspectives help, yet the authors emphasize that current research is heavily descriptive and needs stronger real-world testing of tailored interventions.'
   }
 ];
 
@@ -228,32 +279,14 @@ const PHASE_NOTES = {
     papers: []
   },
   p3_lesson: {
-    title: 'Phase 3 Teaching Notes — The Psychology of Choice',
-    goal: 'Discuss present bias, risk perception, and how effort affects perceived value.',
-    bullets: [
-      'Present bias pulls us toward immediate convenience (puddle / drinking immediately).',
-      'Effort increases perceived meaning, but working harder does not guarantee safety.'
-    ],
-    papers: [
-      {
-        concept: 'Present bias',
-        cite: 'Taş, Maknoon & Rezaei (2026)',
-        note: "Time's Influence: Systematic review of biases in intertemporal decision-making (immediate vs future rewards).",
-        url: 'https://scholar.google.com/scholar?q=Tas+Maknoon+Rezaei+2026+Time+Influence+Intertemporal+Decision-Making'
-      },
-      {
-        concept: 'Risk perception',
-        cite: 'Perlstein (2023)',
-        note: 'How people interpret and discuss uncertain risks — clear water looks safe even when hidden risks exist.',
-        url: 'https://scholar.google.com/scholar?q=Perlstein+2023+Risk+perception+and+interpersonal+discussion+on+risk'
-      },
-      {
-        concept: 'Effort & reward value',
-        cite: 'Harmon-Jones et al. (2024) + Campbell, Wang & Inzlicht (2025)',
-        note: 'Effort-reward valuation depends on perceived control (2024). Across 6 studies (n = 2,883), exerting effort increased perceived meaning — without being post-hoc justification (2025).',
-        url: 'https://scholar.google.com/scholar?q=Campbell+Wang+Inzlicht+2025+Experimental+evidence+that+exerting+effort+increases+meaning'
-      }
-    ]
+    title: "Phase 3 Teaching Notes — The Psychology of Choice (Time's Influence)",
+    paperLink: {
+      label: 'Taş, Maknoon, & Rezaei (2026, Annual Review of Psychology)',
+      url: 'https://www.annualreviews.org/content/journals/10.1146/annurev-psych-091924-040158'
+    },
+    speakerSlides: PHASE3_SPEAKER_SLIDES,
+    mainTakeaways: PHASE3_MAIN_TAKEAWAYS,
+    papers: []
   },
   p4_intro: {
     title: "Phase 4 — Gamemakers' Twist (Announcement)",
@@ -403,6 +436,10 @@ export default function PresenterNotes() {
     syncService.controlGame('set_takeaway_slide', undefined, { index: idx });
   };
 
+  const handleToggleTakeawayHidden = () => {
+    syncService.controlGame('toggle_takeaway_hidden');
+  };
+
   return (
     <div className="min-h-screen bg-[#16062A] text-purple-50 p-4 sm:p-6">
       <div className="max-w-5xl mx-auto space-y-5">
@@ -420,17 +457,32 @@ export default function PresenterNotes() {
 
           <div className="flex items-center gap-2.5 flex-wrap">
             {lessonPaperOptions && (
-              <select
-                aria-label="Select presented paper"
-                value={game?.selectedLessonIndex ?? 0}
-                onChange={(e) => handleSelectPaper(parseInt(e.target.value, 10) || 0)}
-                className="px-2.5 py-1.5 rounded-xl bg-purple-900 border border-orange-400/50 text-xs font-mono text-orange-200 focus:outline-none cursor-pointer"
-                title="Silently switch which paper is shown on the shared screen"
-              >
-                {lessonPaperOptions.map((label, idx) => (
-                  <option key={label} value={idx}>{label}</option>
-                ))}
-              </select>
+              <>
+                <button
+                  type="button"
+                  onClick={handleToggleTakeawayHidden}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all ${
+                    game?.takeawayHidden
+                      ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-400'
+                      : 'bg-purple-900 hover:bg-purple-800 text-purple-100 border-purple-700'
+                  }`}
+                  title={game?.takeawayHidden ? 'Reveal takeaway screen to all players' : 'Hide takeaway screen from all players'}
+                >
+                  {game?.takeawayHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  <span>{game?.takeawayHidden ? 'Show Takeaway' : 'Hide Takeaway'}</span>
+                </button>
+                <select
+                  aria-label="Select presented paper"
+                  value={game?.selectedLessonIndex ?? 0}
+                  onChange={(e) => handleSelectPaper(parseInt(e.target.value, 10) || 0)}
+                  className="px-2.5 py-1.5 rounded-xl bg-purple-900 border border-orange-400/50 text-xs font-mono text-orange-200 focus:outline-none cursor-pointer"
+                  title="Silently switch which paper is shown on the shared screen"
+                >
+                  {lessonPaperOptions.map((label, idx) => (
+                    <option key={label} value={idx}>{label}</option>
+                  ))}
+                </select>
+              </>
             )}
             <div className="px-3 py-1.5 rounded-xl bg-purple-900 border border-purple-700 flex items-center gap-2 font-mono text-sm font-black text-orange-300">
               <Timer className="w-4 h-4" />

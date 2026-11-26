@@ -51,7 +51,7 @@ const PHASE4_PAPERS = [
   }
 ];
 
-export default function Phase4Lesson({ isGamemaker, selectedTopicIndex, onSelectTopic, onBackToWoods }) {
+export default function Phase4Lesson({ isGamemaker, selectedTopicIndex, takeawayHidden = false, onSelectTopic, onToggleHidden, onBackToWoods }) {
   return (
     <TakeawayLayout
       phaseLabel="Phase 4 • Fire & The Feast"
@@ -60,8 +60,10 @@ export default function Phase4Lesson({ isGamemaker, selectedTopicIndex, onSelect
       closingLine="Knowing when to change direction — or walk away from a trap — is a strength."
       papers={PHASE4_PAPERS}
       selectedIndex={selectedTopicIndex}
+      takeawayHidden={takeawayHidden}
       isGamemaker={isGamemaker}
       onSelectTopic={onSelectTopic}
+      onToggleHidden={onToggleHidden}
       presenterNote="Under acute stress (the Fire) and high-stakes bait (The Feast), our instincts can pull us toward familiar habits or desperate gambles. Adapting cleanly under pressure means pausing to evaluate what actually helps you survive."
       actionButton={
         <button

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BookOpen, ExternalLink, PauseCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, ExternalLink, PauseCircle, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 
 export default function TakeawayLayout({
   phaseLabel,
@@ -9,9 +9,11 @@ export default function TakeawayLayout({
   papers,
   selectedIndex = 0,
   takeawaySlideIndex = 0,
+  takeawayHidden = false,
   isGamemaker,
   onSelectTopic,
   onChangeTakeawaySlide,
+  onToggleHidden,
   presenterNote,
   extraBottom,
   actionButton
@@ -48,7 +50,22 @@ export default function TakeawayLayout({
             <span>Game Paused • Psychology Takeaway</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {isGamemaker && onToggleHidden && (
+              <button
+                type="button"
+                onClick={onToggleHidden}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border transition-all ${
+                  takeawayHidden
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-400 shadow-sm'
+                    : 'bg-purple-900/90 hover:bg-purple-800 text-purple-100 border-purple-700'
+                }`}
+                title={takeawayHidden ? 'Reveal takeaway to all players' : 'Hide takeaway from players (private preview)'}
+              >
+                {takeawayHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{takeawayHidden ? 'Show to Players' : 'Hide from Players'}</span>
+              </button>
+            )}
             {isGamemaker && papers.length > 1 && onSelectTopic && (
               <select
                 aria-label="Select research paper"
@@ -71,7 +88,41 @@ export default function TakeawayLayout({
         </div>
 
         {/* Main Card (Warm Orange & Purple Palette) */}
+        {takeawayHidden && !isGamemaker ? (
+          <div className="bg-white rounded-3xl border-2 border-orange-200 shadow-lg p-10 sm:p-14 text-center space-y-4">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-800">
+              <EyeOff className="w-7 h-7" />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-[11px] font-bold font-mono uppercase">
+              <BookOpen className="w-3.5 h-3.5" />
+              {phaseLabel}
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-purple-950">
+              Eyes on the Gamemaker
+            </h2>
+            <p className="text-sm text-purple-700 max-w-md mx-auto leading-relaxed">
+              The game is paused for a quick psychology insight. Your screen will reveal or resume when the Gamemaker continues.
+            </p>
+          </div>
+        ) : (
         <div className="bg-white rounded-3xl border-2 border-orange-200 shadow-lg p-6 sm:p-8 space-y-6">
+          {takeawayHidden && isGamemaker && (
+            <div className="rounded-xl bg-orange-100 border border-orange-300 px-4 py-2 text-xs font-mono font-bold text-orange-900 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5">
+                <EyeOff className="w-3.5 h-3.5" />
+                Private Preview: Currently hidden from all players
+              </span>
+              {onToggleHidden && (
+                <button
+                  type="button"
+                  onClick={onToggleHidden}
+                  className="underline hover:text-purple-950"
+                >
+                  Reveal Now
+                </button>
+              )}
+            </div>
+          )}
           {/* Header */}
           <div className="text-center space-y-1.5 border-b border-orange-100 pb-4">
             <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-[11px] font-bold font-mono uppercase">
@@ -246,6 +297,7 @@ export default function TakeawayLayout({
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

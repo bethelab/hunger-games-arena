@@ -276,8 +276,10 @@ export default function LessonReveal({
   isGamemaker,
   selectedTopicIndex,
   takeawaySlideIndex = 0,
+  takeawayHidden = false,
   onSelectTopic,
   onChangeTakeawaySlide,
+  onToggleHidden,
   onBackToLobby
 }) {
   return (
@@ -288,9 +290,11 @@ export default function LessonReveal({
       papers={PHASE1_PAPERS}
       selectedIndex={selectedTopicIndex}
       takeawaySlideIndex={takeawaySlideIndex}
+      takeawayHidden={takeawayHidden}
       isGamemaker={isGamemaker}
       onSelectTopic={onSelectTopic}
       onChangeTakeawaySlide={onChangeTakeawaySlide}
+      onToggleHidden={onToggleHidden}
       actionButton={
         <button
           onClick={onBackToLobby}

@@ -583,8 +583,10 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
           takeawaySlideIndex={game?.takeawaySlideIndex ?? 0}
+          takeawayHidden={Boolean(game?.takeawayHidden)}
           onSelectTopic={handleSelectLessonTopic}
           onChangeTakeawaySlide={(idx) => syncService.controlGame('set_takeaway_slide', undefined, { index: idx })}
+          onToggleHidden={() => syncService.controlGame('toggle_takeaway_hidden')}
           onBackToLobby={handleBackToLobby}
         />
       )}
@@ -623,7 +625,9 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
         <Phase2Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
+          takeawayHidden={Boolean(game?.takeawayHidden)}
           onSelectTopic={handleSelectLessonTopic}
+          onToggleHidden={() => syncService.controlGame('toggle_takeaway_hidden')}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -676,7 +680,11 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
         <Phase3Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
+          takeawaySlideIndex={game?.takeawaySlideIndex ?? 0}
+          takeawayHidden={Boolean(game?.takeawayHidden)}
           onSelectTopic={handleSelectLessonTopic}
+          onChangeTakeawaySlide={(idx) => syncService.controlGame('set_takeaway_slide', undefined, { index: idx })}
+          onToggleHidden={() => syncService.controlGame('toggle_takeaway_hidden')}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -726,7 +734,9 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
         <Phase4Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
+          takeawayHidden={Boolean(game?.takeawayHidden)}
           onSelectTopic={handleSelectLessonTopic}
+          onToggleHidden={() => syncService.controlGame('toggle_takeaway_hidden')}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -779,7 +789,9 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
         <Phase5Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
+          takeawayHidden={Boolean(game?.takeawayHidden)}
           onSelectTopic={handleSelectLessonTopic}
+          onToggleHidden={() => syncService.controlGame('toggle_takeaway_hidden')}
           onShowFinale={handleShowFinale}
         />
       )}

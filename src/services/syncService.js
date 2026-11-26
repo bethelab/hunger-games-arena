@@ -10,6 +10,7 @@ const DEFAULT_GAME_STATE = {
   completedPhase: 0,
   selectedLessonIndex: 0,
   takeawaySlideIndex: 0,
+  takeawayHidden: false,
   durationSeconds: 30,
   votingStartedAt: null,
   choices: {},

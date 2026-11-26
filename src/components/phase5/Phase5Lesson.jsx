@@ -52,7 +52,7 @@ const PHASE5_PAPERS = [
   }
 ];
 
-export default function Phase5Lesson({ isGamemaker, selectedTopicIndex, onSelectTopic, onShowFinale }) {
+export default function Phase5Lesson({ isGamemaker, selectedTopicIndex, takeawayHidden = false, onSelectTopic, onToggleHidden, onShowFinale }) {
   return (
     <TakeawayLayout
       phaseLabel="Phase 5 • Sponsors"
@@ -61,8 +61,10 @@ export default function Phase5Lesson({ isGamemaker, selectedTopicIndex, onSelect
       closingLine="Being capable and being perceived as capable are not always the same thing."
       papers={PHASE5_PAPERS}
       selectedIndex={selectedTopicIndex}
+      takeawayHidden={takeawayHidden}
       isGamemaker={isGamemaker}
       onSelectTopic={onSelectTopic}
+      onToggleHidden={onToggleHidden}
       presenterNote="Because sponsor votes were anonymous, notice how tone, clarity, and argument quality shaped who stood out. Sometimes how we communicate our abilities is just as influential as the abilities themselves."
       actionButton={
         <button

@@ -52,7 +52,7 @@ const PHASE2_PAPERS = [
   }
 ];
 
-export default function Phase2Lesson({ isGamemaker, selectedTopicIndex, onSelectTopic, onBackToWoods }) {
+export default function Phase2Lesson({ isGamemaker, selectedTopicIndex, takeawayHidden = false, onSelectTopic, onToggleHidden, onBackToWoods }) {
   return (
     <TakeawayLayout
       phaseLabel="Phase 2 • Alliances"
@@ -60,8 +60,10 @@ export default function Phase2Lesson({ isGamemaker, selectedTopicIndex, onSelect
       subtitle="Why do we choose to trust — or walk away?"
       papers={PHASE2_PAPERS}
       selectedIndex={selectedTopicIndex}
+      takeawayHidden={takeawayHidden}
       isGamemaker={isGamemaker}
       onSelectTopic={onSelectTopic}
+      onToggleHidden={onToggleHidden}
       presenterNote="Participants must decide whether working with another tribute is worth the risk. This research explains why trust expectations, group membership, and perceived benefits vs. costs drive cooperation."
       actionButton={
         <button

@@ -75,7 +75,7 @@ export default function AvatarCreator({ tributeData, onComplete, onBack }) {
           </div>
         </div>
 
-        {/* Right Column: 12 Avatar Choices in 4x3 Grid (Box 2 - Equal Size) */}
+        {/* Right Column: 16 Avatar Choices in 4x4 Grid (Box 2 - Equal Size) */}
         <div className="flex flex-col justify-between p-6 bg-white rounded-2xl retro-border-light shadow-xl">
           <div>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">

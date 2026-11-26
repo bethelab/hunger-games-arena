@@ -139,7 +139,7 @@ export function getRandomDistrict() {
   return DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)];
 }
 
-// 12 Distinct Curated Preset Avatars with Interesting Names
+// 16 Distinct Curated Preset Avatars with Interesting Names
 export const AVATAR_PRESETS = [
   {
     id: "preset-1",
@@ -296,6 +296,58 @@ export const AVATAR_PRESETS = [
       outfit: "jumpsuit",
       accessory: "berries"
     }
+  },
+  {
+    id: "preset-13",
+    name: "Zephyr",
+    avatar: {
+      gender: "neutral",
+      skinTone: "azure",
+      hairStyle: "wild",
+      hairColor: "silver",
+      expression: "smirk",
+      outfit: "stealth",
+      accessory: "goggles"
+    }
+  },
+  {
+    id: "preset-14",
+    name: "Moss",
+    avatar: {
+      gender: "female",
+      skinTone: "emerald",
+      hairStyle: "bob",
+      hairColor: "violet",
+      expression: "calm",
+      outfit: "camo",
+      accessory: "berries"
+    }
+  },
+  {
+    id: "preset-15",
+    name: "Lyra",
+    avatar: {
+      gender: "female",
+      skinTone: "magenta",
+      hairStyle: "ponytail",
+      hairColor: "blonde",
+      expression: "smile",
+      outfit: "cloak",
+      accessory: "bow"
+    }
+  },
+  {
+    id: "preset-16",
+    name: "Solstice",
+    avatar: {
+      gender: "male",
+      skinTone: "solar",
+      hairStyle: "mohawk",
+      hairColor: "black",
+      expression: "fierce",
+      outfit: "armor",
+      accessory: "trident"
+    }
   }
 ];
 
@@ -307,7 +359,11 @@ export const AVATAR_OPTIONS = {
     { id: "medium", color: "#D97706", label: "Tan" },
     { id: "olive", color: "#B45309", label: "Bronze" },
     { id: "dark", color: "#78350F", label: "Deep" },
-    { id: "cyber", color: "#C4B5FD", label: "Violet Shimmer" }
+    { id: "cyber", color: "#C4B5FD", label: "Violet Shimmer" },
+    { id: "azure", color: "#38BDF8", label: "Electric Cyan" },
+    { id: "emerald", color: "#34D399", label: "Emerald Glow" },
+    { id: "magenta", color: "#F472B6", label: "Neon Rose" },
+    { id: "solar", color: "#FB923C", label: "Solar Coral" }
   ],
   hairColors: [
     { id: "black", color: "#1E1B4B" },

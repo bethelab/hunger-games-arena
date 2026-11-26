@@ -107,8 +107,8 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
       try {
         sessionStorage.removeItem("panem_tribute_session_v4");
       } catch (e) {}
-      if (onNavigate) onNavigate('reaping');
-      window.location.hash = '#/reaping';
+      if (onNavigate) onNavigate('home');
+      window.location.hash = '#/home';
       window.location.reload();
     }
   }, [game?.resetToken, isGamemaker, onNavigate]);
@@ -139,10 +139,10 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
     }
   }, [currentTribute, hasCelebratedEntry, isGamemaker]);
 
-  // Generate QR Code for Gamemaker share
+  // Generate QR Code for Gamemaker share (points to Home page)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const joinUrl = window.location.origin + window.location.pathname + '#/reaping';
+      const joinUrl = window.location.origin + window.location.pathname + '#/home';
       QRCode.toDataURL(joinUrl, {
         width: 320,
         margin: 2,
@@ -274,7 +274,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
 
   const handleCopyLink = () => {
     if (navigator.clipboard) {
-      const joinUrl = window.location.origin + window.location.pathname + '#/reaping';
+      const joinUrl = window.location.origin + window.location.pathname + '#/home';
       navigator.clipboard.writeText(joinUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

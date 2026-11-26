@@ -5,7 +5,10 @@ const MAX_PEDESTALS = 15;
 
 const DEFAULT_GAME_STATE = {
   phase: 'lobby',
+  started: false,
+  slideIndex: 0,
   completedPhase: 0,
+  selectedLessonIndex: 0,
   durationSeconds: 30,
   votingStartedAt: null,
   choices: {},

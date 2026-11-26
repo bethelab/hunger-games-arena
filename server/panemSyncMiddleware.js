@@ -75,6 +75,8 @@ export function createPanemSyncMiddleware() {
   function createInitialGameState(duration = 30, keepGamemaker = null) {
     return {
       phase: 'lobby',
+      started: false,       // false while on Home / Instruction Slides; true once Gamemaker clicks "Let the Games Begin!"
+      slideIndex: 0,        // 0 = Home Title Page, 1..6 = Instruction Slides
       completedPhase: 0,
       gamemakerId: keepGamemaker?.gamemakerId || null,
       gamemakerName: keepGamemaker?.gamemakerName || null,
@@ -831,7 +833,13 @@ export function createPanemSyncMiddleware() {
             timerState.duration = durationSeconds
           }
 
-          if (action === 'select_lesson_topic') {
+          if (action === 'set_slide') {
+            const safeSlide = Math.max(0, Math.min(6, parseInt(index, 10) || 0))
+            gameState.slideIndex = safeSlide
+          } else if (action === 'begin_games') {
+            gameState.started = true
+            gameState.phase = 'lobby'
+          } else if (action === 'select_lesson_topic') {
             const safeIdx = Math.max(0, Math.min(2, parseInt(index, 10) || 0))
             gameState.selectedLessonIndex = safeIdx
           } else if (action === 'start_intro') {

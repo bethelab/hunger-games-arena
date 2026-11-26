@@ -1,49 +1,68 @@
 import React, { useState, useEffect } from 'react';
+import HomePresentation from './components/HomePresentation';
 import ReapingScreen from './components/ReapingScreen';
 import AvatarCreator from './components/AvatarCreator';
 import ArenaLobby from './components/ArenaLobby';
 import HostController from './components/HostController';
 import PresenterNotes from './components/PresenterNotes';
+import { syncService } from './services/syncService';
 import { getRandomDistrict, AVATAR_PRESETS } from './data/hungerGamesData';
 
-// Use sessionStorage so each tab/device is a unique, independent tribute
+// Use sessionStorage so each tab/device is a unique, independent session
 const SESSION_STORAGE_KEY = "panem_tribute_session_v4";
 
 function getRouteFromHash() {
-  if (typeof window === 'undefined') return 'reaping';
+  if (typeof window === 'undefined') return 'home';
   const raw = window.location.hash.replace(/^#\/?/, '').trim();
-  if (['reaping', 'stylist', 'arena', 'controller', 'notes'].includes(raw)) {
+  if (['home', 'reaping', 'stylist', 'arena', 'controller', 'notes'].includes(raw)) {
     return raw;
   }
-  return 'reaping';
+  return 'home';
 }
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState(getRouteFromHash);
+  const [game, setGame] = useState(syncService.getGame());
 
-  // Each browser tab/window gets its own isolated tribute identity
   const [tributeData, setTributeData] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
         const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        if (saved) {
-          return JSON.parse(saved);
-        }
+        if (saved) return JSON.parse(saved);
       } catch (e) {}
     }
     const randomDist = getRandomDistrict();
-    // Unique ID per browser tab or phone session
     const uniqueTabId = "trib-" + Date.now().toString(36) + "-" + Math.random().toString(36).substring(2, 7);
     return {
       id: uniqueTabId,
       role: 'tribute',
+      gamemakerAuthed: false,
       realName: '',
       alias: '',
       districtId: randomDist.id,
-      motto: randomDist.motto,
+      motto: '',
       avatar: AVATAR_PRESETS[0].avatar
     };
   });
+
+  // Subscribe to global game state so Home automatically hands off when Gamemaker clicks "Let the Games Begin"
+  useEffect(() => {
+    const unsubscribe = syncService.subscribe(null, null, (updatedGame) => {
+      setGame(updatedGame);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Auto-advance from 'home' once Gamemaker starts the Games!
+  useEffect(() => {
+    if (currentRoute === 'home' && game?.started) {
+      if (tributeData?.role === 'gamemaker' && tributeData?.gamemakerAuthed) {
+        navigateTo('arena');
+      } else {
+        navigateTo('reaping');
+      }
+    }
+  }, [game?.started, currentRoute, tributeData?.role, tributeData?.gamemakerAuthed]);
 
   // Save per-tab session
   useEffect(() => {
@@ -54,13 +73,11 @@ export default function App() {
     }
   }, [tributeData]);
 
-  // Handle URL hash changes (#/reaping, #/stylist, #/arena, #/controller)
+  // Handle URL hash changes
   useEffect(() => {
     const handleHashChange = () => {
-      const next = getRouteFromHash();
-      setCurrentRoute(next);
+      setCurrentRoute(getRouteFromHash());
     };
-
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
@@ -72,23 +89,57 @@ export default function App() {
     }
   };
 
-  // Step 1 Complete: Reaping
-  const handleReapingComplete = (reapingDetails) => {
+  // Gamemaker signs in from Home -> goes to Stylist to pick avatar -> returns to Home slides
+  const handleGamemakerAuth = (name) => {
     setTributeData(prev => ({
       ...prev,
-      ...reapingDetails
+      role: 'gamemaker',
+      gamemakerAuthed: true,
+      realName: name,
+      alias: name
     }));
     navigateTo('stylist');
   };
 
-  // Step 2 Complete: Stylist / Avatar
+  // Gamemaker clicks "Let the Games Begin!" on Home slides
+  const handleBeginGames = async () => {
+    await syncService.controlGame('begin_games');
+    navigateTo('arena');
+  };
+
+  // Player Step 1 Complete: Reaping -> Stylist
+  const handleReapingComplete = (reapingDetails) => {
+    setTributeData(prev => ({
+      ...prev,
+      ...reapingDetails,
+      gamemakerAuthed: reapingDetails.role === 'gamemaker' ? true : prev.gamemakerAuthed
+    }));
+    navigateTo('stylist');
+  };
+
+  // Stylist Complete:
+  // - If Gamemaker signed in before Games started -> return to Home slides!
+  // - Otherwise -> enter Arena!
   const handleStylistComplete = (fullTribute) => {
     setTributeData(fullTribute);
-    navigateTo('arena');
+    if (fullTribute.role === 'gamemaker' && !game?.started) {
+      navigateTo('home');
+    } else {
+      navigateTo('arena');
+    }
   };
 
   return (
     <div className="min-h-screen">
+      {currentRoute === 'home' && (
+        <HomePresentation
+          tributeData={tributeData}
+          game={game}
+          onGamemakerAuth={handleGamemakerAuth}
+          onBeginGames={handleBeginGames}
+        />
+      )}
+
       {currentRoute === 'reaping' && (
         <ReapingScreen
           initialData={tributeData}
@@ -99,7 +150,7 @@ export default function App() {
       {currentRoute === 'stylist' && (
         <AvatarCreator
           tributeData={tributeData}
-          onBack={() => navigateTo('reaping')}
+          onBack={() => navigateTo(tributeData?.role === 'gamemaker' && !game?.started ? 'home' : 'reaping')}
           onComplete={handleStylistComplete}
         />
       )}

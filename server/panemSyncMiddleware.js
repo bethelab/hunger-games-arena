@@ -922,7 +922,7 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'show_p2_lesson') {
             gameState.selectedLessonIndex = 0
             gameState.takeawaySlideIndex = 0
-            gameState.takeawayHidden = false
+            gameState.takeawayHidden = true
             gameState.phase = 'p2_lesson'
           } else if (action === 'start_p3_intro') {
             const p3Secs = typeof durationSeconds === 'number' ? durationSeconds : 30
@@ -1000,7 +1000,7 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'show_p4_lesson') {
             gameState.selectedLessonIndex = 0
             gameState.takeawaySlideIndex = 0
-            gameState.takeawayHidden = false
+            gameState.takeawayHidden = true
             gameState.phase = 'p4_lesson'
           } else if (action === 'start_p5_intro') {
             const p5Secs = typeof durationSeconds === 'number' ? durationSeconds : 60

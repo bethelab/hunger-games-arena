@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AvatarRenderer from './AvatarRenderer';
+import { AVATAR_PRESETS } from '../data/hungerGamesData';
 import { syncService } from '../services/syncService';
 import { sound } from './SoundEffects';
 import {
@@ -20,7 +21,7 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
   const slideIndex = game?.slideIndex ?? 0;
 
   useEffect(() => {
-    document.title = 'Would You Survive the Hunger Games?';
+    document.title = 'Would You Survive the 15th Hunger Games?';
   }, []);
 
   useEffect(() => {
@@ -78,12 +79,12 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
       : `${slideIndex} / 6`;
 
   return (
-    <div className="min-h-screen bg-[#2E1065] text-purple-950 flex flex-col justify-between relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#16062A] text-purple-950 flex flex-col justify-between relative overflow-x-hidden">
       {/* Top accent stripe */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-700 via-orange-500 to-purple-700" />
 
       {/* ================= TOP HEADER BAR: TRIBUTE / GAMEMAKER ================= */}
-      <header className="relative z-20 border-b border-purple-800/60 bg-purple-950/90 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <header className="relative z-20 border-b border-purple-900/70 bg-[#100420]/95 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-sm">
         {isGamemaker ? (
           <div className="flex items-center gap-2.5">
             <div className="relative rounded-full p-0.5 border-2 border-orange-400 bg-purple-900">
@@ -184,7 +185,7 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
           <div className="flex-1">
             {/* SLIDE 0: HOME TITLE PAGE (Clean title & subtitle only) */}
             {slideIndex === 0 && (
-              <div className="rounded-3xl bg-gradient-to-br from-purple-900 via-[#3B0764] to-purple-950 text-white p-10 sm:p-16 shadow-2xl border-2 border-orange-400/50 text-center space-y-6">
+              <div className="rounded-3xl bg-gradient-to-br from-[#240A42] via-[#1B0733] to-[#120424] text-white p-10 sm:p-16 shadow-2xl border-2 border-orange-500/50 text-center space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/20 border border-orange-400/40 text-orange-200 text-xs font-bold font-mono-capitol uppercase tracking-widest">
                   <Sparkles className="w-3.5 h-3.5 text-orange-300" />
                   Interactive Share &amp; Learn
@@ -192,7 +193,11 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
 
                 <div className="space-y-3">
                   <h1 className="text-3xl sm:text-5xl font-black font-cinzel tracking-wide leading-tight">
-                    Would You Survive the Hunger Games?
+                    Would{' '}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 drop-shadow-[0_0_20px_rgba(249,115,22,0.55)]">
+                      YOU
+                    </span>{' '}
+                    Survive the 15th Hunger Games?
                   </h1>
                   <p className="text-base sm:text-xl text-orange-200 font-medium max-w-2xl mx-auto">
                     The Psychology Behind Our Decisions Under Pressure
@@ -238,10 +243,12 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
                       Preview: Player Pedestals
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      {['#1', '#2', '#3', '#4', '#5', '#6'].map((num, i) => (
-                        <div key={num} className={`p-2 rounded-xl border text-center ${i === 1 ? 'bg-orange-50 border-orange-400' : 'bg-white border-purple-200'}`}>
-                          <div className="text-[9px] font-mono font-bold text-purple-500">{num}</div>
-                          <div className="text-lg">{['🏹', '🔥', '🛡️', '🌲', '⚡', '🎯'][i]}</div>
+                      {AVATAR_PRESETS.slice(0, 6).map((preset, i) => (
+                        <div key={preset.id} className={`p-2 rounded-xl border text-center flex flex-col items-center gap-0.5 ${i === 1 ? 'bg-orange-50 border-orange-400' : 'bg-white border-purple-200'}`}>
+                          <div className="text-[9px] font-mono font-bold text-purple-500">#{i + 1}</div>
+                          <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+                            <AvatarRenderer avatar={preset.avatar} districtId={i + 1} size="sm" />
+                          </div>
                           <div className="text-[8px] font-bold text-emerald-600">READY</div>
                         </div>
                       ))}
@@ -476,7 +483,7 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
 
             {/* SLIDE 7: FINAL SLIDE — MAY THE ODDS BE EVER IN YOUR FAVOR + LET THE GAMES BEGIN */}
             {slideIndex === 7 && (
-              <div className="rounded-3xl bg-gradient-to-br from-purple-900 via-[#3B0764] to-orange-800 text-white p-10 sm:p-16 shadow-2xl border-2 border-orange-400 text-center space-y-6">
+              <div className="rounded-3xl bg-gradient-to-br from-[#240A42] via-[#1B0733] to-[#7C2D12] text-white p-10 sm:p-16 shadow-2xl border-2 border-orange-400 text-center space-y-6">
                 <div className="text-4xl">🏹</div>
                 <h2 className="text-3xl sm:text-5xl font-black font-cinzel tracking-wide leading-tight text-orange-200">
                   May the Odds Be Ever in Your Favor
@@ -525,7 +532,7 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
       </main>
 
       {/* ================= CLEAN FOOTER (No "May the odds" here; Gamemaker shortcut in bottom-right) ================= */}
-      <footer className="relative z-20 border-t border-purple-800/60 bg-purple-950/90 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+      <footer className="relative z-20 border-t border-purple-900/70 bg-[#100420]/95 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
         <span className="text-[11px] font-mono-capitol text-purple-300">
           {slideIndex === 0 ? 'Welcome' : slideIndex === 7 ? 'Ready to Begin' : `Instructions ${slideIndex} of 6`}
         </span>

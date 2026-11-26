@@ -96,10 +96,10 @@ export default function LessonReveal({ isGamemaker, selectedTopicIndex, onSelect
       actionButton={
         <button
           onClick={onBackToLobby}
-          className="px-7 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider shadow-md inline-flex items-center gap-2 transition-all"
+          className="px-7 py-3 rounded-2xl bg-purple-900 hover:bg-purple-950 text-white font-black text-xs uppercase tracking-wider shadow-md inline-flex items-center gap-2 transition-all"
         >
           <RotateCcw className="w-4 h-4" />
-          Resume Game — Enter The Woods
+          Resume Game: Enter The Woods
         </button>
       }
     />

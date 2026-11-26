@@ -245,6 +245,7 @@ export function createPanemSyncMiddleware() {
 
     tributes = tributes.map(t => {
       const choice = gameState.choices[t.id]
+      const timedOut = Boolean(choice?.timedOut)
       const strategy = choice?.strategy || 'woods'
       const responseTime = choice?.responseTime ?? gameState.durationSeconds
       const config = STRATEGY_CONFIG[strategy] || STRATEGY_CONFIG.woods
@@ -262,12 +263,14 @@ export function createPanemSyncMiddleware() {
       }
 
       const finalElimProb = Math.min(0.95, actualProb + latePenalty)
-      const fell = finalElimProb > 0 ? Math.random() < finalElimProb : false
+      const fell = timedOut ? true : (finalElimProb > 0 ? Math.random() < finalElimProb : false)
       const speedBonus = fell ? 0 : getSpeedBonus(responseTime)
-      const roundPoints = fell ? -5 : (config.basePoints + speedBonus)
+      const roundPoints = timedOut ? -2 : (fell ? -5 : (config.basePoints + speedBonus))
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
 
-      const detail = fell
+      const detail = timedOut
+        ? 'Timed out (-2)'
+        : fell
         ? `Hit in ${strategy} (-5)`
         : `${strategy} (+${config.basePoints})${speedBonus ? ` + Speed (+${speedBonus})` : ''}`
 
@@ -453,9 +456,9 @@ export function createPanemSyncMiddleware() {
       let fireDied = false
       let fireLabel = ''
       if (!fireChoice) {
-        firePoints = -8
+        firePoints = -2
         fireDied = true
-        fireLabel = 'Fire timeout (-8)'
+        fireLabel = 'Fire timeout (-2)'
       } else if (fireChoice === 'downhill') {
         firePoints = 4
         fireLabel = 'Moved downhill (+4)'
@@ -475,9 +478,9 @@ export function createPanemSyncMiddleware() {
       let feastBonusVote = false
       let feastLabel = ''
       if (!feastChoice) {
-        feastPoints = -8
+        feastPoints = -2
         feastDied = true
-        feastLabel = 'Feast timeout (-8)'
+        feastLabel = 'Feast timeout (-2)'
       } else if (feastChoice === 'skip') {
         feastPoints = 5
         feastLabel = 'Skipped Feast (+5)'
@@ -834,7 +837,7 @@ export function createPanemSyncMiddleware() {
           }
 
           if (action === 'set_slide') {
-            const safeSlide = Math.max(0, Math.min(6, parseInt(index, 10) || 0))
+            const safeSlide = Math.max(0, Math.min(7, parseInt(index, 10) || 0))
             gameState.slideIndex = safeSlide
           } else if (action === 'begin_games') {
             gameState.started = true

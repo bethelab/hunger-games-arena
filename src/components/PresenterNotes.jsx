@@ -411,7 +411,7 @@ export default function PresenterNotes() {
             <div className="flex items-center justify-between">
               <div className="text-xs font-mono uppercase font-bold text-orange-400 flex items-center gap-1.5">
                 <Users className="w-4 h-4" />
-                Live Tributes ({tributes.length}/12)
+                Live Tributes ({tributes.length}/15)
               </div>
               <span className="text-[11px] font-mono text-purple-400">Phase: {phase}</span>
             </div>

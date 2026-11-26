@@ -35,7 +35,7 @@ import {
   RefreshCw, QrCode, Download, Copy, Check, X, Flame, Eye, EyeOff, Trees, Droplets, Zap, Sparkles, Trophy, BookOpen
 } from 'lucide-react';
 
-const MAX_STATIONS = 12;
+const MAX_STATIONS = 15;
 
 const STRATEGY_BADGE = {
   cornucopia: { label: 'Cornucopia', icon: '⚔️', cls: 'bg-orange-100 text-orange-800 border-orange-300' },
@@ -508,7 +508,7 @@ export default function ArenaLobby({ currentTribute }) {
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-purple-200 bg-white text-purple-800 text-xs font-bold shadow-sm hover:border-purple-300 transition-all"
           >
             <Users className="w-3.5 h-3.5 text-purple-600" />
-            <span>Tributes ({tributes.length}/12)</span>
+            <span>Tributes ({tributes.length}/15)</span>
           </button>
         </div>
       </header>
@@ -767,7 +767,7 @@ export default function ArenaLobby({ currentTribute }) {
               <>
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-900 text-xs font-bold font-mono-capitol">
                   <Trees className="w-3.5 h-3.5 text-emerald-700" />
-                  The Woods • {tributes.length} / 12 Tributes Hiding
+                  The Woods • {tributes.length} / 15 Tributes Hiding
                 </span>
                 <p className="text-[11px] text-purple-600 font-mono-capitol">
                   {completedPhase >= 5
@@ -784,12 +784,12 @@ export default function ArenaLobby({ currentTribute }) {
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-800 text-xs font-bold font-mono-capitol">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                {tributes.length} / 12 Tributes Ready
+                {tributes.length} / 15 Tributes Ready
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 w-full max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 w-full max-w-5xl mx-auto">
             {pedestals.map(({ number, tribute }) => {
               const isMe = tribute && tribute.id === currentTribute?.id;
               const district = tribute ? (DISTRICTS.find(d => d.id === tribute.districtId) || DISTRICTS[0]) : null;
@@ -939,7 +939,7 @@ export default function ArenaLobby({ currentTribute }) {
                 <div className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-orange-600" />
                   <h3 className="text-base font-bold font-cinzel text-purple-950">
-                    Tribute Roster ({tributes.length}/12)
+                    Tribute Roster ({tributes.length}/15)
                   </h3>
                 </div>
                 <button

@@ -1,7 +1,7 @@
 // Multi-Device & Multi-Tab Synchronization Service
 const STORAGE_KEY = "panem_arena_tributes_shared_v4";
 const BROADCAST_CHANNEL = "panem_broadcast_channel_v4";
-const MAX_PEDESTALS = 12;
+const MAX_PEDESTALS = 15;
 
 const DEFAULT_GAME_STATE = {
   phase: 'lobby',

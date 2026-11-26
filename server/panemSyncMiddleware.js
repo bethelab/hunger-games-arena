@@ -733,7 +733,7 @@ export function createPanemSyncMiddleware() {
           } else {
             const taken = new Set(tributes.map(t => t.pedestalNumber))
             let ped = 1
-            for (let i = 1; i <= 12; i++) {
+            for (let i = 1; i <= 15; i++) {
               if (!taken.has(i)) { ped = i; break }
             }
             tribute.pedestalNumber = ped

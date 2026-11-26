@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { syncService } from '../services/syncService';
 import { DISTRICTS } from '../data/hungerGamesData';
-import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, EyeOff, FlaskConical } from 'lucide-react';
+import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, EyeOff, FlaskConical, HelpCircle } from 'lucide-react';
 
 const Key = ({ children }) => (
   <strong className="text-orange-300 font-extrabold underline decoration-orange-400/75 underline-offset-2">
@@ -12,61 +12,61 @@ const Key = ({ children }) => (
 const TIME_PRESSURE_SPEAKER_SLIDES = [
   {
     title: 'Slide 1: Title & The Central Question (~45 seconds)',
-    visual: 'Decision Making Under Time Pressure: A Prospect Theory Approach — Young, Goodie, Hall, & Wu (2012, OBHDP).',
+    visual: 'Decision Making Under Time Pressure — Young, Goodie, Hall, & Wu (2012, OBHDP).',
     script: [
       <>
-        &ldquo;We make choices under deadlines every day—from quick market trades and urgent project calls to emergency responses. Earlier decision research gave us <Key>two clashing stories</Key> about what deadlines do to risk: one camp argued time pressure makes people <Key>more cautious and risk-averse</Key>, while another—like Busemeyer&rsquo;s sequential-comparison work—suggested people become <Key>more risk-seeking when expected value is positive</Key>, and <Key>more risk-averse when it&rsquo;s negative</Key>.&rdquo;
+        &ldquo;We make choices under deadlines every day—from production incidents and urgent deploys to quick project calls. Earlier studies gave us <Key>two clashing stories</Key> about what deadlines do to risk: one camp argued time pressure makes people <Key>play it safer</Key>, while another suggested people become <Key>bolder when chasing a win</Key> and <Key>more cautious when facing a loss</Key>.&rdquo;
       </>,
       <>
-        &ldquo;In this <Key>2012 study</Key>, <Key>Young, Goodie, Hall, and Wu</Key> tested how time pressure shapes risk by fitting participants&rsquo; <Key>certainty equivalents</Key> into a formal <Key>prospect theory model</Key>—separating <Key>how we value outcomes</Key> from <Key>how we weight probabilities</Key>.&rdquo;
+        &ldquo;In this <Key>2012 study</Key>, <Key>Young, Goodie, Hall, and Wu</Key> tested how time pressure actually shapes our choices by splitting every decision into two separate pieces: <Key>how much we value the prize</Key> vs. <Key>how we judge the odds</Key>.&rdquo;
       </>
     ]
   },
   {
-    title: 'Slide 2: Experimental Setup & Model (~60 seconds)',
-    visual: 'Modified Georgia Gambling Task + Prospect Theory parameters: risk attractiveness, probability discriminability, and outcome utility.',
+    title: 'Slide 2: How They Tested It (~60 seconds)',
+    visual: 'Unlimited Time vs. 10s / 5s Clock + 3 levers: Appetite for Risk, Odds Sensitivity, and Prize Sensitivity.',
     script: [
       <>
-        &ldquo;Across <Key>three experiments</Key> with <Key>undergraduate participants</Key>, the researchers compared an <Key>unlimited-time group</Key> against a <Key>time-pressure group</Key>—giving <Key>10 seconds</Key> on the first screen of a narrowing-down task and <Key>5 seconds</Key> on each follow-up screen. Time pressure worked: participants responded <Key>roughly twice as fast</Key> and violated the clock on only a small fraction of bets.&rdquo;
+        &ldquo;Across <Key>three experiments</Key> with <Key>college students</Key>, the researchers compared an <Key>unlimited-time group</Key> against a <Key>time-pressure group</Key>—giving <Key>10 seconds</Key> on the first screen to narrow down a bet and <Key>5 seconds</Key> on each follow-up screen. The clock worked: people responded <Key>roughly twice as fast</Key> and missed the timer on only a small fraction of bets.&rdquo;
       </>,
       <>
-        &ldquo;Using <Key>nonlinear mixed-effects modeling</Key> on certainty equivalents, the authors tracked <Key>three psychological mechanisms</Key>: <Key>risk attractiveness</Key> (elevation of probability weighting), <Key>probability discriminability</Key> (sensitivity to differences in probability), and <Key>outcome utility</Key> (how sharply value changes with payoff size). They tested <Key>gains-only bets</Key> using both random odds and U.S. state population confidence wagers, and then tested <Key>loss-only bets</Key>.&rdquo;
+        &ldquo;By comparing each person&rsquo;s choices, the authors tracked <Key>three levers</Key>: <Key>appetite for risk</Key> (how tempting a gamble feels), <Key>odds sensitivity</Key> (how clearly you tell a 60% chance apart from a 90% chance), and <Key>prize sensitivity</Key> (how much a bigger payout changes your mind). They tested <Key>win-only bets</Key> first, and then <Key>loss-only bets</Key>.&rdquo;
       </>
     ]
   },
   {
-    title: 'Slide 3: Gains Domain — Experiments 1 & 2 (~75 seconds)',
-    visual: 'Gains-Only Bets (Experiments 1 & 2): Higher risk attractiveness under time pressure; no main-effect shift in probability discriminability or value curvature.',
+    title: 'Slide 3: Playing for Wins — Experiments 1 & 2 (~75 seconds)',
+    visual: 'Win-Only Bets (Experiments 1 & 2): Risky wins feel more tempting under a deadline; prize sensitivity stays flat.',
     script: [
       <>
-        &ldquo;In <Key>Experiment 1</Key>, participants faced <Key>gains-only bets</Key> across higher win probabilities—from <Key>51% to 99%</Key>—with <Key>real-money payout potential</Key>. Under time pressure, <Key>risk attractiveness increased significantly</Key>, both overall and on random bets alone, while <Key>outcome utility</Key> and <Key>overall probability discriminability did not shift significantly</Key> at the main-effect level.&rdquo;
+        &ldquo;In <Key>Experiment 1</Key>, people faced <Key>win-only bets</Key> with high odds—from <Key>51% to 99%</Key>—with <Key>real money</Key> on the line. Under time pressure, <Key>risky bets felt noticeably more appealing</Key>, while <Key>how they valued the prize size</Key> and <Key>how sharply they read the odds</Key> didn&rsquo;t really change overall.&rdquo;
       </>,
       <>
-        &ldquo;<Key>Experiment 2</Key> broadened the probability range <Key>down below 50%</Key> using six-state population comparisons and <Key>hypothetical stakes</Key>. Again, time pressure <Key>increased overall risk attractiveness</Key> across the wider probability spectrum—showing the pattern holds across both <Key>real and hypothetical incentives</Key>, though with one twist: in the random condition without time pressure, participants showed <Key>higher probability discriminability</Key> than under time pressure.&rdquo;
+        &ldquo;<Key>Experiment 2</Key> widened the odds <Key>down below 50%</Key> using U.S. state population trivia and <Key>pretend stakes</Key>. Again, time pressure <Key>made risky wins look more tempting</Key> across the whole range—showing the effect holds for both <Key>real and pretend rewards</Key>, though without time pressure people were slightly <Key>sharper at reading random odds</Key>.&rdquo;
       </>
     ]
   },
   {
-    title: 'Slide 4: Losses Domain — Experiment 3 (~60 seconds)',
-    visual: 'Loss-Only Bets (Experiment 3): Steep risk-seeking in both groups; lower probability discriminability under time pressure.',
+    title: 'Slide 4: Facing Losses — Experiment 3 (~60 seconds)',
+    visual: 'Loss-Only Bets (Experiment 3): Both groups gamble to avoid a sure loss; deadlines blur the odds.',
     script: [
       <>
-        &ldquo;What happens when the framing flips to <Key>pure losses</Key>? In <Key>Experiment 3</Key>, participants estimated how much they&rsquo;d pay to avoid <Key>loss-only gambles</Key>—backed by <Key>cash endowments and real loss risk</Key>.&rdquo;
+        &ldquo;What happens when you flip the script to <Key>pure losses</Key>? In <Key>Experiment 3</Key>, players started with <Key>real cash</Key> and decided how much they&rsquo;d pay to avoid a <Key>loss-only gamble</Key>.&rdquo;
       </>,
       <>
-        &ldquo;Here, participants in <Key>both conditions</Key> showed <Key>strong risk-seeking behavior</Key>—reflected in elevated probability weighting curves and willingness to gamble rather than pay out—which may have created a <Key>ceiling effect</Key> that masked any extra shift in risk attractiveness. Crucially, however, time pressure <Key>significantly reduced probability discriminability</Key>, meaning stressed participants were <Key>less sensitive to differences across loss probabilities</Key>.&rdquo;
+        &ldquo;Here, <Key>both groups</Key> strongly preferred <Key>gambling over paying a guaranteed loss</Key>—they were already so risk-seeking that there wasn&rsquo;t much room left to push it higher. The big shift was different: time pressure <Key>blurred how well people told different loss odds apart</Key>, so stressed players treated medium risks and high risks much more alike.&rdquo;
       </>
     ]
   },
   {
     title: 'Slide 5: Limitations & Wrap-Up (~45 seconds)',
-    visual: 'Key caveats: Hypothetical stakes in Exp. 2, narrowing/matching elicitation vs. direct choice, and a shared 3-station lab room.',
+    visual: 'Caveats: Pretend stakes in Exp. 2, step-by-step narrowing task vs. simple Yes/No, and a shared 3-computer lab room.',
     script: [
       <>
-        &ldquo;A few caveats matter when reading these numbers: <Key>Experiment 2 used hypothetical stakes</Key>, the task used a <Key>narrowing-down matching format</Key> rather than simple binary choice, and sessions ran in a <Key>shared three-workstation room</Key> where subtle social dynamics could play a role.&rdquo;
+        &ldquo;A few caveats worth noting: <Key>Experiment 2 used pretend stakes</Key>, the task used a <Key>step-by-step narrowing screen</Key> instead of a simple Yes/No choice, and sessions ran in a <Key>shared 3-computer room</Key> where being around others could subtly nudge people.&rdquo;
       </>,
       <>
-        &ldquo;Overall, the paper shows that time pressure doesn&rsquo;t just speed us up—it shifts <Key>specific cognitive levers</Key> depending on whether we&rsquo;re looking at <Key>potential gains</Key> or <Key>potential losses</Key>.&rdquo;
+        &ldquo;Bottom line: deadlines don&rsquo;t just make us rush—they pull <Key>different mental levers</Key> depending on whether we&rsquo;re chasing a <Key>potential win</Key> or dodging a <Key>potential loss</Key>.&rdquo;
       </>
     ]
   }
@@ -74,26 +74,26 @@ const TIME_PRESSURE_SPEAKER_SLIDES = [
 
 const TIME_PRESSURE_MAIN_TAKEAWAYS = [
   {
-    heading: 'Deadlines boost risk attractiveness for gains',
+    heading: 'Deadlines make risky wins feel more tempting',
     text: (
       <>
-        Across both narrow (<Key>51%–99%</Key>) and broad probability ranges—and with <Key>real or hypothetical stakes</Key>—time pressure made gains-framed risks look <Key>more attractive</Key> without changing <Key>outcome utility</Key> at the main-effect level.
+        Across narrow (<Key>51%–99%</Key>) and wide odds—with <Key>real or pretend stakes</Key>—time pressure boosted appetite for win-framed risks without changing how people valued the prize itself.
       </>
     )
   },
   {
-    heading: 'Deadlines blunt probability sensitivity for losses',
+    heading: 'Deadlines blur the odds when facing losses',
     text: (
       <>
-        In <Key>loss-framed gambles</Key>, extreme baseline risk-seeking appeared in both groups, while time pressure <Key>impaired how well participants discriminated between probabilities</Key>.
+        When trying to avoid a <Key>loss</Key>, everyone already tended to gamble, while time pressure made people <Key>worse at telling different risk levels apart</Key>.
       </>
     )
   },
   {
-    heading: 'Time pressure acts selectively rather than uniformly',
+    heading: 'Time pressure shifts specific gears, not everything at once',
     text: (
       <>
-        Rather than simply making people universally more reckless or more cautious, deadlines affect <Key>distinct prospect-theory mechanisms differently</Key> across the <Key>gains and losses domains</Key>.
+        Rather than making us universally reckless or cautious, a ticking clock affects <Key>wins and losses differently</Key>.
       </>
     )
   }
@@ -105,16 +105,50 @@ const RESEARCH_QUICK_FACTS = {
   journal: 'Organizational Behavior and Human Decision Processes (OBHDP)',
   url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC3375992/',
   facts: [
-    { key: 'Study Type', value: '3 lab experiments using a modified Georgia Gambling Task (narrowing-down certainty-equivalent matching format)' },
-    { key: 'Participants', value: 'Undergraduate participants tested in a shared 3-workstation lab room' },
-    { key: 'Time Manipulation', value: 'Unlimited time vs. 10s on first screen + 5s on each follow-up (~2× faster responses, few clock violations)' },
-    { key: 'Statistical Model', value: 'Nonlinear mixed-effects modeling fitting Prospect Theory (risk attractiveness, probability discriminability, outcome utility)' },
-    { key: 'Experiment 1', value: 'Gains-only bets (51%–99% win odds), real-money payout potential → ↑ Risk attractiveness under time pressure' },
-    { key: 'Experiment 2', value: 'Gains-only bets (broad odds <50%–99%, 6-state population + random bets), hypothetical stakes → ↑ Overall risk attractiveness' },
-    { key: 'Experiment 3', value: 'Loss-only gambles backed by real cash endowments → Steep baseline risk-seeking in both groups; ↓ Probability discriminability under time pressure' },
-    { key: 'Key Caveats', value: 'Hypothetical stakes in Exp. 2; matching/narrowing elicitation vs. direct binary choice; shared 3-station lab room' }
+    { key: 'Study Type', value: '3 lab experiments using a modified Georgia Gambling Task (step-by-step narrowing task)' },
+    { key: 'Participants', value: 'College undergraduates tested in a shared 3-workstation lab room' },
+    { key: 'Time Manipulation', value: 'Unlimited time vs. 10s on screen 1 + 5s on each follow-up (~2× faster responses, few timeouts)' },
+    { key: 'Experiment 1', value: 'Win-only bets (51%–99% odds), real-money payout potential → ↑ Risk feels more tempting under time pressure' },
+    { key: 'Experiment 2', value: 'Win-only bets (wide odds <50%–99%, U.S. state population trivia + random bets), pretend stakes → ↑ Risk feels more tempting' },
+    { key: 'Experiment 3', value: 'Loss-only gambles with real starting cash → Strong gambling in both groups; ↓ Worse at telling loss odds apart under time pressure' },
+    { key: 'Key Caveats', value: 'Pretend stakes in Exp. 2; narrowing task vs. simple Yes/No choice; shared 3-computer lab room' }
   ]
 };
+
+const PSYCH_GLOSSARY = [
+  {
+    term: 'Nonlinear mixed-effects modeling',
+    simple: 'A stats method that fits curved patterns (not just straight lines) while accounting for the fact that every person has their own baseline habits.'
+  },
+  {
+    term: 'Prospect Theory',
+    simple: 'A famous decision model showing people do not judge choices by pure math — we feel losses harder than gains and mentally bend the odds.'
+  },
+  {
+    term: 'Certainty Equivalent',
+    simple: 'The guaranteed payout you would accept to walk away from a gamble (e.g., taking $40 for sure instead of a 50/50 shot at $100).'
+  },
+  {
+    term: 'Risk Attractiveness',
+    simple: 'How tempting a risky bet feels overall — even when the actual math/odds have not changed.'
+  },
+  {
+    term: 'Probability Discriminability',
+    simple: 'How sharply you tell different odds apart (e.g., treating a 55% chance very differently from a 90% chance instead of blurring them together).'
+  },
+  {
+    term: 'Outcome Utility',
+    simple: 'How much extra value (or pain) each additional dollar of reward or loss feels like to you.'
+  },
+  {
+    term: 'Ceiling Effect',
+    simple: 'When both groups are already near the maximum score or behavior, leaving no room to measure an extra increase.'
+  },
+  {
+    term: 'Narrowing / Matching Elicitation',
+    simple: 'Instead of a simple Yes/No choice, players narrow down a range across a few quick screens to pinpoint their exact breaking point.'
+  }
+];
 
 const PHASE_NOTES = {
   lobby: {
@@ -224,7 +258,7 @@ const PHASE_NOTES = {
     goal: 'Compare survival rates across Fire Disaster and The Feast, then launch the Psychology Takeaway!',
     bullets: [
       'Anyone who timed out automatically died (-2 pts).',
-      'Great bridge into the talk: they just made rapid gain-framed (Feast/Cornucopia) and loss-framed (Fire/Ambush) choices under time pressure.'
+      'Great bridge into the talk: they just made rapid win-framed (Feast/Cornucopia) and loss-framed (Fire/Ambush) choices under time pressure.'
     ]
   },
   p4_lesson: {
@@ -271,6 +305,7 @@ export default function PresenterNotes() {
   const [timer, setTimer] = useState({ running: false, countdown: 30, duration: 30 });
   const [game, setGame] = useState(syncService.getGame());
   const [showResearchFacts, setShowResearchFacts] = useState(false);
+  const [showGlossary, setShowGlossary] = useState(false);
 
   useEffect(() => {
     document.title = 'Gamemaker Private Notes | The Hunger Games';
@@ -470,7 +505,7 @@ export default function PresenterNotes() {
             )}
           </div>
 
-          {/* Right Column: Live Private Tribute Monitor + Collapsible Research Quick Facts */}
+          {/* Right Column: Live Private Tribute Monitor + Research Quick Facts + Plain-English Terms Glossary */}
           <div className="lg:col-span-5 space-y-4 self-start">
             <div className="p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3">
               <div className="flex items-center justify-between">
@@ -518,7 +553,7 @@ export default function PresenterNotes() {
               </div>
             </div>
 
-            {/* Collapsible Research Quick Facts Box (Right Below Scores) */}
+            {/* Collapsible Research Quick Facts Box */}
             <div className="rounded-2xl bg-purple-950/90 border border-orange-400/40 overflow-hidden">
               <button
                 type="button"
@@ -573,6 +608,45 @@ export default function PresenterNotes() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Collapsible Plain-English Jargon Glossary Box */}
+            <div className="rounded-2xl bg-purple-950/90 border border-purple-700 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowGlossary(!showGlossary)}
+                className="w-full px-5 py-3.5 flex items-center justify-between gap-2 text-left hover:bg-purple-900/60 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-orange-400 shrink-0" />
+                  <div>
+                    <div className="text-xs font-mono uppercase font-bold text-orange-400">
+                      Psychology Terms (Simple Explainers)
+                    </div>
+                    <div className="text-[11px] text-purple-300">
+                      Plain-English cheat sheet if asked (click to {showGlossary ? 'collapse' : 'expand'})
+                    </div>
+                  </div>
+                </div>
+                {showGlossary ? (
+                  <ChevronUp className="w-4 h-4 text-orange-300 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-orange-300 shrink-0" />
+                )}
+              </button>
+
+              {showGlossary && (
+                <div className="px-5 pb-5 pt-2 border-t border-purple-800 space-y-2">
+                  {PSYCH_GLOSSARY.map((item) => (
+                    <div key={item.term} className="p-2.5 rounded-xl bg-purple-900/60 border border-purple-800/90 text-xs">
+                      <span className="font-mono font-bold text-orange-300 text-[11px] block mb-0.5">
+                        {item.term}
+                      </span>
+                      <span className="text-purple-100 leading-relaxed">{item.simple}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

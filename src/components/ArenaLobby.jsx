@@ -288,6 +288,8 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
   });
 
   const phase = game?.phase || 'lobby';
+  const isLessonPhase = ['lesson', 'p2_lesson', 'p3_lesson', 'p4_lesson', 'p5_lesson'].includes(phase);
+  const hideTakeawayToArena = isLessonPhase && Boolean(game?.takeawayHidden) && !effectiveIsGamemaker;
   const myChoice = currentTribute?.id ? game?.choices?.[currentTribute.id] : null;
   const myP2Choice = currentTribute?.id ? game?.p2Choices?.[currentTribute.id] : null;
   const myP3Location = currentTribute?.id ? game?.p3Locations?.[currentTribute.id] : null;
@@ -578,7 +580,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           onShowLesson={handleShowLesson}
         />
       )}
-      {phase === 'lesson' && (
+      {phase === 'lesson' && !hideTakeawayToArena && (
         <LessonReveal
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
@@ -621,7 +623,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           onShowLesson={handleShowPhase2Lesson}
         />
       )}
-      {phase === 'p2_lesson' && (
+      {phase === 'p2_lesson' && !hideTakeawayToArena && (
         <Phase2Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
@@ -676,7 +678,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           onShowLesson={handleShowPhase3Lesson}
         />
       )}
-      {phase === 'p3_lesson' && (
+      {phase === 'p3_lesson' && !hideTakeawayToArena && (
         <Phase3Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
@@ -730,7 +732,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           onShowLesson={handleShowPhase4Lesson}
         />
       )}
-      {phase === 'p4_lesson' && (
+      {phase === 'p4_lesson' && !hideTakeawayToArena && (
         <Phase4Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
@@ -785,7 +787,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           onShowLesson={handleShowPhase5Lesson}
         />
       )}
-      {phase === 'p5_lesson' && (
+      {phase === 'p5_lesson' && !hideTakeawayToArena && (
         <Phase5Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
@@ -804,8 +806,8 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
         />
       )}
 
-      {/* Lobby View: Arena (before Phase 1) -> The Woods (after Phase 1) */}
-      {phase === 'lobby' && (
+      {/* Lobby View: Arena (before Phase 1) -> The Woods (after Phase 1); also shown to players when takeaway is hidden */}
+      {(phase === 'lobby' || hideTakeawayToArena) && (
         <main className="relative z-10 flex-1 flex flex-col px-4 sm:px-6 py-6">
           <div className="flex flex-col items-center justify-center mb-5 gap-1">
             {inTheWoods ? (

@@ -88,29 +88,12 @@ export default function TakeawayLayout({
         </div>
 
         {/* Main Card (Warm Orange & Purple Palette) */}
-        {takeawayHidden && !isGamemaker ? (
-          <div className="bg-white rounded-3xl border-2 border-orange-200 shadow-lg p-10 sm:p-14 text-center space-y-4">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-800">
-              <EyeOff className="w-7 h-7" />
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-[11px] font-bold font-mono uppercase">
-              <BookOpen className="w-3.5 h-3.5" />
-              {phaseLabel}
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-purple-950">
-              Eyes on the Gamemaker
-            </h2>
-            <p className="text-sm text-purple-700 max-w-md mx-auto leading-relaxed">
-              The game is paused for a quick psychology insight. Your screen will reveal or resume when the Gamemaker continues.
-            </p>
-          </div>
-        ) : (
         <div className="bg-white rounded-3xl border-2 border-orange-200 shadow-lg p-6 sm:p-8 space-y-6">
           {takeawayHidden && isGamemaker && (
             <div className="rounded-xl bg-orange-100 border border-orange-300 px-4 py-2 text-xs font-mono font-bold text-orange-900 flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5">
                 <EyeOff className="w-3.5 h-3.5" />
-                Private Preview: Currently hidden from all players
+                Private Preview: Players are currently in the Arena / Woods
               </span>
               {onToggleHidden && (
                 <button
@@ -118,7 +101,7 @@ export default function TakeawayLayout({
                   onClick={onToggleHidden}
                   className="underline hover:text-purple-950"
                 >
-                  Reveal Now
+                  Show to Players
                 </button>
               )}
             </div>
@@ -297,7 +280,6 @@ export default function TakeawayLayout({
             )}
           </div>
         </div>
-        )}
       </div>
     </div>
   );

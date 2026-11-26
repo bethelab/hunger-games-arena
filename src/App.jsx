@@ -3,6 +3,7 @@ import ReapingScreen from './components/ReapingScreen';
 import AvatarCreator from './components/AvatarCreator';
 import ArenaLobby from './components/ArenaLobby';
 import HostController from './components/HostController';
+import PresenterNotes from './components/PresenterNotes';
 import { getRandomDistrict, AVATAR_PRESETS } from './data/hungerGamesData';
 
 // Use sessionStorage so each tab/device is a unique, independent tribute
@@ -11,7 +12,7 @@ const SESSION_STORAGE_KEY = "panem_tribute_session_v4";
 function getRouteFromHash() {
   if (typeof window === 'undefined') return 'reaping';
   const raw = window.location.hash.replace(/^#\/?/, '').trim();
-  if (['reaping', 'stylist', 'arena', 'controller'].includes(raw)) {
+  if (['reaping', 'stylist', 'arena', 'controller', 'notes'].includes(raw)) {
     return raw;
   }
   return 'reaping';
@@ -114,6 +115,10 @@ export default function App() {
         <HostController
           onNavigate={navigateTo}
         />
+      )}
+
+      {currentRoute === 'notes' && (
+        <PresenterNotes />
       )}
     </div>
   );

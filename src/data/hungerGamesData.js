@@ -4,13 +4,13 @@ export const DISTRICTS = [
   {
     id: 1,
     name: "District 1",
-    specialty: "CSS & Pixel Snobs",
+    specialty: "Pixel Perfect Crew",
     techRole: "Can center a div in a combat zone; will judge your font choices before attacking.",
     icon: "🎨",
-    badge: "Pixel Perfectionist",
+    badge: "Pixel Perfect",
     color: "#7C3AED",
     accent: "#F97316",
-    motto: "If it's off by 1px, we riot."
+    motto: ""
   },
   {
     id: 2,
@@ -18,120 +18,120 @@ export const DISTRICTS = [
     specialty: "Friday 5 PM Deployers",
     techRole: "Pushes hotfixes directly to production on Friday afternoon without a staging check.",
     icon: "🔥",
-    badge: "Prod Cowboy",
+    badge: "Prod Ready",
     color: "#9333EA",
     accent: "#EA580C",
-    motto: "What could possibly go wrong?"
+    motto: ""
   },
   {
     id: 3,
     name: "District 3",
-    specialty: "The 140+ Tab Hoarders",
+    specialty: "140+ Open Tabs",
     techRole: "Has an open tab from a StackOverflow question in 2021.",
     icon: "📑",
-    badge: "RAM Consumer",
+    badge: "Tab Collector",
     color: "#6D28D9",
     accent: "#FB923C",
-    motto: "I'll read it later, I swear."
+    motto: ""
   },
   {
     id: 4,
     name: "District 4",
-    specialty: "Cold Brew Powered SREs",
-    techRole: "Runs purely on nitro cold brew and pager alert cortisol; immune to panic.",
+    specialty: "Cold Brew Crew",
+    techRole: "Runs purely on iced coffee and sheer focus.",
     icon: "☕",
-    badge: "Pager Champion",
+    badge: "Caffeinated",
     color: "#5B21B6",
     accent: "#F97316",
-    motto: "Everything is fine. The fire is warm."
+    motto: ""
   },
   {
     id: 5,
     name: "District 5",
-    specialty: "AI Prompt Whisperers",
-    techRole: "Won't fight with physical weapons; will ask AI for the optimal 3-step survival prompt.",
+    specialty: "AI Prompt Pros",
+    techRole: "Will ask AI for the optimal 3-step survival plan before taking a single step.",
     icon: "🤖",
-    badge: "Prompt Oracle",
+    badge: "Prompt Pro",
     color: "#7E22CE",
     accent: "#F97316",
-    motto: "Act as a tribute who never gets eliminated."
+    motto: ""
   },
   {
     id: 6,
     name: "District 6",
-    specialty: "Force-Push Gladiators",
-    techRole: "Solves merge conflicts with 'git push --force --no-verify' and deletes the Slack trail.",
+    specialty: "Force-Push Squad",
+    techRole: "Solves merge conflicts with 'git push --force --no-verify'.",
     icon: "⚡",
-    badge: "Merge Destroyer",
+    badge: "Git Bold",
     color: "#6B21A8",
     accent: "#EA580C",
-    motto: "History is written by whoever pushed last."
+    motto: ""
   },
   {
     id: 7,
     name: "District 7",
-    specialty: "Unscheduled Meeting Lurkers",
-    techRole: "Traps tributes in 'quick 5-minute huddles' that drain everyone's stamina for 45 minutes.",
+    specialty: "Quick 5-Min Huddle",
+    techRole: "Turns every quick sync into a 45-minute strategy session.",
     icon: "📅",
-    badge: "Calendar Assassin",
+    badge: "Meeting Host",
     color: "#4C1D95",
     accent: "#FB923C",
-    motto: "Let's take this offline."
+    motto: ""
   },
   {
     id: 8,
     name: "District 8",
-    specialty: "Edge Case Bug Summoners",
-    techRole: "Will break the Cornucopia by pressing the gong button with negative numerical values.",
+    specialty: "Edge Case Finders",
+    techRole: "Will break the Cornucopia by pressing the gong button with negative values.",
     icon: "🐛",
-    badge: "Chaos Tester",
+    badge: "QA Mind",
     color: "#8B5CF6",
     accent: "#F97316",
-    motto: "If you didn't want it clicked, why is it there?"
+    motto: ""
   },
   {
     id: 9,
     name: "District 9",
-    specialty: "Legacy Code Archaeologists",
-    techRole: "Survives by deciphering ancient commented-out scripts written by engineers 15 years ago.",
+    specialty: "Legacy Code Squad",
+    techRole: "Survives by deciphering ancient scripts written 15 years ago.",
     icon: "📜",
-    badge: "Relic Decoder",
+    badge: "Code Historian",
     color: "#7C3AED",
     accent: "#EA580C",
-    motto: "Do not touch this line or the sky falls."
+    motto: ""
   },
   {
     id: 10,
     name: "District 10",
-    specialty: "Teams React-Only Communicators",
+    specialty: "Teams Emoji Only",
     techRole: "Communicates solely via 🚀, 👀, and 🫡 emojis on Teams.",
     icon: "👀",
-    badge: "Emoji Phantom",
+    badge: "React Pro",
     color: "#6D28D9",
     accent: "#FB923C",
-    motto: "🫡"
+    motto: ""
   },
   {
     id: 11,
     name: "District 11",
-    specialty: "Dark Mode Zealots",
+    specialty: "Dark Mode Only",
     techRole: "Temporarily blinded by daylight.",
     icon: "🕶️",
-    badge: "Shadow Hacker",
+    badge: "Night Owl",
     color: "#581C87",
     accent: "#F97316",
-    motto: "Light mode burns the soul."
+    motto: ""
   },
   {
     id: 12,
     name: "District 12",
-    specialty: "Works-On-My-Machine Denialists",
-    techRole: "Refuses to acknowledge arena traps because 'it compiled fine in my local environment'.",
+    specialty: "Works on My Machine",
+    techRole: "Refuses to acknowledge arena traps because it compiled fine locally.",
     icon: "💻",
-    badge: "Localhost Victor",
+    badge: "Localhost",
     color: "#4C1D95",
     accent: "#EA580C",
-    motto: "Must be a configuration issue on your end."
+    motto: ""
   }
 ];
 
@@ -139,27 +139,27 @@ export function getRandomDistrict() {
   return DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)];
 }
 
-// 9 Curated Preset Avatars (With strong female, male & neutral options)
+// 12 Distinct Curated Preset Avatars with Interesting Names
 export const AVATAR_PRESETS = [
   {
     id: "preset-1",
-    name: "The Scout",
+    name: "Ember",
     avatar: {
       gender: "female",
-      skinTone: "light",
-      hairStyle: "ponytail",
-      hairColor: "blonde",
-      expression: "smirk",
-      outfit: "jumpsuit",
-      accessory: "bow"
+      skinTone: "fair",
+      hairStyle: "wild",
+      hairColor: "orange",
+      expression: "intense",
+      outfit: "camo",
+      accessory: "warpaint"
     }
   },
   {
     id: "preset-2",
-    name: "The Strategist",
+    name: "Vesper",
     avatar: {
       gender: "female",
-      skinTone: "fair",
+      skinTone: "light",
       hairStyle: "bob",
       hairColor: "violet",
       expression: "calm",
@@ -169,33 +169,7 @@ export const AVATAR_PRESETS = [
   },
   {
     id: "preset-3",
-    name: "The Firebrand",
-    avatar: {
-      gender: "female",
-      skinTone: "light",
-      hairStyle: "wild",
-      hairColor: "orange",
-      expression: "intense",
-      outfit: "camo",
-      accessory: "warpaint"
-    }
-  },
-  {
-    id: "preset-4",
-    name: "The Cyber Rebel",
-    avatar: {
-      gender: "female",
-      skinTone: "cyber",
-      hairStyle: "dreads",
-      hairColor: "violet",
-      expression: "fierce",
-      outfit: "stealth",
-      accessory: "goggles"
-    }
-  },
-  {
-    id: "preset-5",
-    name: "The Archer",
+    name: "Kestrel",
     avatar: {
       gender: "female",
       skinTone: "olive",
@@ -207,8 +181,47 @@ export const AVATAR_PRESETS = [
     }
   },
   {
+    id: "preset-4",
+    name: "Nova",
+    avatar: {
+      gender: "female",
+      skinTone: "cyber",
+      hairStyle: "dreads",
+      hairColor: "silver",
+      expression: "smirk",
+      outfit: "stealth",
+      accessory: "goggles"
+    }
+  },
+  {
+    id: "preset-5",
+    name: "Saffron",
+    avatar: {
+      gender: "female",
+      skinTone: "medium",
+      hairStyle: "ponytail",
+      hairColor: "blonde",
+      expression: "smile",
+      outfit: "armor",
+      accessory: "berries"
+    }
+  },
+  {
     id: "preset-6",
-    name: "The Gladiator",
+    name: "Rowan",
+    avatar: {
+      gender: "female",
+      skinTone: "dark",
+      hairStyle: "bob",
+      hairColor: "crimson",
+      expression: "fierce",
+      outfit: "cloak",
+      accessory: "trident"
+    }
+  },
+  {
+    id: "preset-7",
+    name: "Orion",
     avatar: {
       gender: "male",
       skinTone: "olive",
@@ -220,21 +233,47 @@ export const AVATAR_PRESETS = [
     }
   },
   {
-    id: "preset-7",
-    name: "The Champion",
+    id: "preset-8",
+    name: "Atlas",
     avatar: {
       gender: "male",
       skinTone: "dark",
       hairStyle: "dreads",
-      hairColor: "black",
+      hairColor: "brown",
       expression: "smile",
       outfit: "cloak",
       accessory: "pin"
     }
   },
   {
-    id: "preset-8",
-    name: "The Hacker",
+    id: "preset-9",
+    name: "Flint",
+    avatar: {
+      gender: "male",
+      skinTone: "light",
+      hairStyle: "mohawk",
+      hairColor: "orange",
+      expression: "smirk",
+      outfit: "camo",
+      accessory: "bow"
+    }
+  },
+  {
+    id: "preset-10",
+    name: "Cinder",
+    avatar: {
+      gender: "male",
+      skinTone: "fair",
+      hairStyle: "hooded",
+      hairColor: "silver",
+      expression: "intense",
+      outfit: "stealth",
+      accessory: "goggles"
+    }
+  },
+  {
+    id: "preset-11",
+    name: "Cipher",
     avatar: {
       gender: "neutral",
       skinTone: "cyber",
@@ -242,20 +281,20 @@ export const AVATAR_PRESETS = [
       hairColor: "violet",
       expression: "calm",
       outfit: "stealth",
-      accessory: "goggles"
+      accessory: "trident"
     }
   },
   {
-    id: "preset-9",
-    name: "The SRE",
+    id: "preset-12",
+    name: "Briar",
     avatar: {
       gender: "neutral",
       skinTone: "medium",
       hairStyle: "mohawk",
       hairColor: "crimson",
       expression: "intense",
-      outfit: "camo",
-      accessory: "trident"
+      outfit: "jumpsuit",
+      accessory: "berries"
     }
   }
 ];
@@ -301,7 +340,7 @@ export const MOCK_TRIBUTES_SAMPLE = [
     id: "trib-1",
     realName: "Maya",
     districtId: 1,
-    motto: "If it's off by 1px, we riot.",
+    motto: "",
     avatar: AVATAR_PRESETS[0].avatar,
     pedestalNumber: 1,
     status: "ready",
@@ -309,22 +348,12 @@ export const MOCK_TRIBUTES_SAMPLE = [
   },
   {
     id: "trib-2",
-    realName: "Dave",
+    realName: "Marcus",
     districtId: 2,
-    motto: "What could possibly go wrong?",
-    avatar: AVATAR_PRESETS[2].avatar,
+    motto: "",
+    avatar: AVATAR_PRESETS[6].avatar,
     pedestalNumber: 4,
     status: "ready",
     joinedAt: "1m ago"
-  },
-  {
-    id: "trib-3",
-    realName: "Elena",
-    districtId: 4,
-    motto: "Everything is fine. The fire is warm.",
-    avatar: AVATAR_PRESETS[3].avatar,
-    pedestalNumber: 7,
-    status: "ready",
-    joinedAt: "2m ago"
   }
 ];

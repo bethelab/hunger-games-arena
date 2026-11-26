@@ -32,7 +32,7 @@ import Phase5Lesson from './phase5/Phase5Lesson';
 import GrandFinale from './phase5/GrandFinale';
 import {
   Timer, Users, Award, Shield, Play, Pause, RotateCcw,
-  RefreshCw, QrCode, Download, Copy, Check, X, Flame, Eye, EyeOff, Trees, Droplets, Zap, Sparkles, Trophy
+  RefreshCw, QrCode, Download, Copy, Check, X, Flame, Eye, EyeOff, Trees, Droplets, Zap, Sparkles, Trophy, BookOpen
 } from 'lucide-react';
 
 const MAX_STATIONS = 12;
@@ -408,6 +408,17 @@ export default function ArenaLobby({ currentTribute }) {
             >
               <Eye className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{viewAsPlayer ? 'Player View' : 'Gamemaker View'}</span>
+            </button>
+          )}
+
+          {isGamemaker && (
+            <button
+              onClick={() => window.open(`${window.location.origin}${window.location.pathname}#/notes`, 'panem_presenter_notes', 'width=980,height=720')}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-900 hover:bg-purple-950 text-white text-xs font-bold transition-all shadow-sm"
+              title="Open private Presenter Notes in a second window (keep off your shared screen)"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-orange-300" />
+              <span className="hidden md:inline">Notes Window</span>
             </button>
           )}
           {isGamemaker && phase === 'lobby' && completedPhase === 0 && (

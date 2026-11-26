@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { DISTRICTS, getRandomDistrict, GAME_EDITION } from '../data/hungerGamesData';
 import { sound } from './SoundEffects';
 import { syncService } from '../services/syncService';
-import { Sparkles, ArrowRight, ArrowLeft, Shuffle, Shield, Crown } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Shuffle, KeyRound } from 'lucide-react';
 
 export default function ReapingScreen({ onComplete, initialData }) {
   // Sub-steps: 1 = Role & Name Input, 2 = District Drawing, 3 = Confirmation
   const [subStep, setSubStep] = useState(1);
   const [role, setRole] = useState(initialData?.role || 'tribute'); // 'tribute' | 'gamemaker'
   const [realName, setRealName] = useState(initialData?.realName || '');
+  const [gamemakerKey, setGamemakerKey] = useState('');
+  const [keyError, setKeyError] = useState('');
   const [gamemakerTaken, setGamemakerTaken] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState(() => {
     return initialData?.districtId 
@@ -32,20 +34,28 @@ export default function ReapingScreen({ onComplete, initialData }) {
   // Phase 1 -> Phase 2
   const handleNameSubmit = async (e) => {
     e.preventDefault();
+    setKeyError('');
     if (!realName.trim()) {
       alert("Please enter your name!");
       return;
     }
     if (role === 'gamemaker') {
+      if (!gamemakerKey.trim()) {
+        setKeyError('Please enter the Gamemaker access key.');
+        return;
+      }
       const res = await syncService.registerTribute({
         id: initialData?.id,
         role: 'gamemaker',
-        realName: realName.trim()
+        realName: realName.trim(),
+        gamemakerKey: gamemakerKey.trim()
       });
       if (res?.rejected) {
-        alert("A Gamemaker is already active in this session. You will join as a Tribute.");
-        setRole('tribute');
-        setGamemakerTaken(true);
+        setKeyError(res.error || 'Invalid Gamemaker access key.');
+        if (res.error?.toLowerCase().includes('already active')) {
+          setRole('tribute');
+          setGamemakerTaken(true);
+        }
         return;
       }
     }
@@ -100,11 +110,6 @@ export default function ReapingScreen({ onComplete, initialData }) {
       <main className="relative z-10 max-w-lg mx-auto w-full my-auto">
         {/* Banner */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 border border-orange-300 text-orange-700 text-xs font-bold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-            Foxarians on the Reaping
-          </div>
-
           <h1 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-900 via-purple-700 to-orange-600 uppercase tracking-wide font-cinzel">
             The Hunger Games
           </h1>
@@ -202,11 +207,32 @@ export default function ReapingScreen({ onComplete, initialData }) {
                   autoFocus
                   value={realName}
                   onChange={(e) => setRealName(e.target.value)}
-                  placeholder={role === 'gamemaker' ? "e.g. Host Alex, Organizer..." : "e.g. Alex, Jordan..."}
+                  placeholder="e.g. Marcus, Maya..."
                   className="w-full px-4 py-3.5 rounded-xl bg-purple-50/60 border-2 border-purple-200 focus:border-orange-500 focus:bg-white text-purple-950 placeholder-purple-400 text-base font-semibold outline-none transition-all shadow-inner"
                   required
                 />
               </div>
+
+              {/* Gamemaker Secret Key Input (only shown when Gamemaker role is selected) */}
+              {role === 'gamemaker' && (
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs uppercase font-bold tracking-wider text-purple-900 mb-1.5 font-mono-capitol">
+                    <KeyRound className="w-3.5 h-3.5 text-orange-600" />
+                    Gamemaker Access Key
+                  </label>
+                  <input
+                    type="password"
+                    value={gamemakerKey}
+                    onChange={(e) => { setGamemakerKey(e.target.value); setKeyError(''); }}
+                    placeholder="Enter secret host key..."
+                    className="w-full px-4 py-3 rounded-xl bg-purple-50/60 border-2 border-purple-200 focus:border-orange-500 focus:bg-white text-purple-950 placeholder-purple-400 text-sm font-mono font-semibold outline-none transition-all shadow-inner"
+                    required
+                  />
+                  {keyError && (
+                    <p className="text-xs text-rose-600 font-bold mt-1.5">{keyError}</p>
+                  )}
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -262,10 +288,7 @@ export default function ReapingScreen({ onComplete, initialData }) {
                   </span>
                 </div>
 
-                <div className="pt-2 border-t border-purple-200 flex items-center justify-between">
-                  <span className="text-xs text-orange-700 italic font-medium">
-                    "{selectedDistrict.motto}"
-                  </span>
+                <div className="pt-2 border-t border-purple-200 flex items-center justify-end">
                   <button
                     type="button"
                     onClick={handleDrawRandomDistrict}
@@ -318,7 +341,7 @@ export default function ReapingScreen({ onComplete, initialData }) {
                   {realName}
                 </span>
                 <span className="text-[10px] uppercase font-mono-capitol font-bold px-2 py-0.5 rounded-full bg-white/20 text-orange-200 border border-white/20">
-                  {role === 'gamemaker' ? '👑 Head Gamemaker' : '🏹 Tribute'}
+                  {role === 'gamemaker' ? '👑 Gamemaker' : '🏹 Tribute'}
                 </span>
               </div>
 

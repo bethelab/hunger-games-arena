@@ -94,6 +94,7 @@ function shuffleArray(arr) {
 }
 
 export function createPanemSyncMiddleware() {
+  const GAMEMAKER_KEY = (process.env.GAMEMAKER_KEY || 'CAPITOL15').trim()
   let tributes = []
   let timerState = {
     running: false,
@@ -703,9 +704,23 @@ export function createPanemSyncMiddleware() {
               }))
               return
             }
+            // Verify Gamemaker secret key on initial claim
+            if (!gameState.gamemakerId || gameState.gamemakerId !== tribute.id) {
+              const providedKey = (tribute.gamemakerKey || '').trim()
+              if (providedKey !== GAMEMAKER_KEY) {
+                res.statusCode = 403
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({
+                  success: false,
+                  error: 'Invalid Gamemaker access key.'
+                }))
+                return
+              }
+            }
             gameState.gamemakerId = tribute.id
             gameState.gamemakerName = tribute.realName || 'Gamemaker'
             tribute.pedestalNumber = null
+            delete tribute.gamemakerKey
             broadcast('game', gameState)
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, tribute, tributes, game: gameState }))

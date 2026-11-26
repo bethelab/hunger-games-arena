@@ -620,7 +620,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           tributes={tributes}
           alliances={game?.alliances}
           soloIds={game?.soloIds}
-          onShowLesson={handleShowPhase2Lesson}
+          onShowLesson={handleBackToLobby}
         />
       )}
       {phase === 'p2_lesson' && !hideTakeawayToArena && (
@@ -729,7 +729,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           tributes={tributes}
           firePoll={game?.p4FirePoll}
           feastPoll={game?.p4FeastPoll}
-          onShowLesson={handleShowPhase4Lesson}
+          onShowLesson={handleBackToLobby}
         />
       )}
       {phase === 'p4_lesson' && !hideTakeawayToArena && (
@@ -784,7 +784,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           currentTribute={currentTribute}
           tributes={tributes}
           podium={game?.p5Podium}
-          onShowLesson={handleShowPhase5Lesson}
+          onShowLesson={handleShowFinale}
         />
       )}
       {phase === 'p5_lesson' && !hideTakeawayToArena && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { syncService } from '../services/syncService';
 import { DISTRICTS } from '../data/hungerGamesData';
-import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, Users, Timer, Pause, Play, ExternalLink, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Eye, EyeOff, FlaskConical } from 'lucide-react';
 
 const PHASE1_SPEAKER_SLIDES = [
   {
@@ -112,33 +112,43 @@ const PHASE3_MAIN_TAKEAWAYS = [
   }
 ];
 
-const LESSON_PAPER_OPTIONS = {
-  lesson: [
-    '1. Time Pressure (Young, Goodie, Hall, & Wu, 2012)',
-    '2. Risk Perception (Perlstein, 2023)',
-    '3. Social Influence (Bergquist & Ekelund, 2025)'
-  ],
-  p2_lesson: [
-    '1. Cooperation & Social Dilemmas (Lo Iacono et al., 2024)',
-    '2. Social Identity & Group Loyalty (Imada et al., 2024)',
-    '3. Trust (Composto et al., 2025)'
-  ],
-  p3_lesson: [
-    '1. Present Bias (Taş, Maknoon & Rezaei, 2026)',
-    '2. Risk Perception (Perlstein, 2023)',
-    '3. Effort & Reward Value (Campbell, Wang & Inzlicht, 2025)'
-  ],
-  p4_lesson: [
-    '1. Cognitive Flexibility (Egner & Siqi-Liu, 2024)',
-    '2. Stress & Decision-Making (Doroc, Yadav & Murawski, 2025)',
-    '3. Escalation of Commitment (2025 Review)'
-  ],
-  p5_lesson: [
-    '1. Halo Effect (Mattavelli et al., 2026)',
-    '2. Elaboration Likelihood Model (Petty, 2021)',
-    '3. First Impressions (Swider et al., 2026)'
-  ]
+const RESEARCH_QUICK_FACTS = {
+  p1: {
+    label: 'Paper 1: Time Pressure (2012)',
+    title: 'Decision Making Under Time Pressure: A Prospect Theory Approach',
+    authors: 'Young, Goodie, Hall, & Wu (2012)',
+    journal: 'Organizational Behavior and Human Decision Processes (OBHDP)',
+    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC3375992/',
+    facts: [
+      { key: 'Study Type', value: '3 lab experiments using a modified Georgia Gambling Task (narrowing-down certainty-equivalent matching format)' },
+      { key: 'Participants', value: 'Undergraduate participants tested in a shared 3-workstation lab room' },
+      { key: 'Time Manipulation', value: 'Unlimited time vs. 10s on first screen + 5s on each follow-up (~2× faster responses, few clock violations)' },
+      { key: 'Statistical Model', value: 'Nonlinear mixed-effects modeling fitting Prospect Theory (risk attractiveness, probability discriminability, outcome utility)' },
+      { key: 'Experiment 1', value: 'Gains-only bets (51%–99% win odds), real-money payout potential → ↑ Risk attractiveness under time pressure' },
+      { key: 'Experiment 2', value: 'Gains-only bets (broad odds <50%–99%, 6-state population + random bets), hypothetical stakes → ↑ Overall risk attractiveness' },
+      { key: 'Experiment 3', value: 'Loss-only gambles backed by real cash endowments → Steep baseline risk-seeking in both groups; ↓ Probability discriminability under time pressure' },
+      { key: 'Key Caveats', value: 'Hypothetical stakes in Exp. 2; matching/narrowing elicitation vs. direct binary choice; shared 3-station lab room' }
+    ]
+  },
+  p3: {
+    label: "Paper 2: Time's Influence (2026)",
+    title: "Time's Influence: A Systematic Review of Biases in Intertemporal Decision-Making",
+    authors: 'Pelin Gülüm Taş, Yousef Maknoon, & Jafar Rezaei (2026)',
+    journal: 'Annual Review of Psychology',
+    url: 'https://www.annualreviews.org/content/journals/10.1146/annurev-psych-091924-040158',
+    facts: [
+      { key: 'Study Type', value: 'Systematic literature review screening bias taxonomies across Web of Science & Scopus' },
+      { key: 'Sample Size', value: '215 peer-reviewed empirical human studies' },
+      { key: '6 Time Biases', value: 'Present Bias (78), Impact Bias (37), Duration Neglect (25), Planning Fallacy (25), Projection Bias (18), Recency Bias (7)' },
+      { key: 'Domains Covered', value: 'Personal debt & credit cards, health screenings & smoking cessation, green tech/solar adoption, voting, travel, medical procedures, project timelines' },
+      { key: 'Bias Overlaps', value: 'Present ↔ Loss/Risk Aversion; Projection ↔ Salience/Optimism; Recency ↔ Anchoring; Impact ↔ Empathy Gaps/Hindsight; Planning ↔ Optimism/Anchoring' },
+      { key: 'Mitigation Tools', value: 'Precommitment, cooling-off/waiting periods, episodic future thinking, unpacking steps, backward planning, reference data, outside perspective, surrogate experiences' },
+      { key: 'Research Gap', value: 'Heavily descriptive rather than prescriptive — needs stronger real-world testing of tailored interventions' }
+    ]
+  }
 };
+
+const ACTIVE_TAKEAWAY_PHASES = ['lesson', 'p3_lesson'];
 
 const PHASE_NOTES = {
   lobby: {
@@ -407,6 +417,8 @@ export default function PresenterNotes() {
   const [tributes, setTributes] = useState([]);
   const [timer, setTimer] = useState({ running: false, countdown: 30, duration: 30 });
   const [game, setGame] = useState(syncService.getGame());
+  const [showResearchFacts, setShowResearchFacts] = useState(false);
+  const [selectedFactsTab, setSelectedFactsTab] = useState('p1');
 
   useEffect(() => {
     document.title = 'Gamemaker Private Notes | The Hunger Games';
@@ -421,15 +433,21 @@ export default function PresenterNotes() {
   const phase = game?.phase || 'lobby';
   const notes = PHASE_NOTES[phase] || PHASE_NOTES.lobby;
   const sortedTributes = [...tributes].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-  const lessonPaperOptions = LESSON_PAPER_OPTIONS[phase] || null;
+  const isTakeawayPhase = ACTIVE_TAKEAWAY_PHASES.includes(phase);
   const activeSlideIdx = game?.takeawaySlideIndex ?? 0;
+
+  useEffect(() => {
+    if (phase.startsWith('p3_')) {
+      setSelectedFactsTab('p3');
+    } else if (['intro', 'choice', 'results', 'consequences', 'lesson'].includes(phase)) {
+      setSelectedFactsTab('p1');
+    }
+  }, [phase]);
+
+  const currentFacts = RESEARCH_QUICK_FACTS[selectedFactsTab] || RESEARCH_QUICK_FACTS.p1;
 
   const handleToggleTimer = () => {
     syncService.controlTimer(timer.running ? 'pause' : 'start', timer.duration || 30);
-  };
-
-  const handleSelectPaper = (idx) => {
-    syncService.controlGame('select_lesson_topic', undefined, { index: idx });
   };
 
   const handleChangeTakeawaySlide = (idx) => {
@@ -456,33 +474,20 @@ export default function PresenterNotes() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
-            {lessonPaperOptions && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleToggleTakeawayHidden}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all ${
-                    game?.takeawayHidden
-                      ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-400'
-                      : 'bg-purple-900 hover:bg-purple-800 text-purple-100 border-purple-700'
-                  }`}
-                  title={game?.takeawayHidden ? 'Reveal takeaway screen to all players' : 'Hide takeaway screen from all players'}
-                >
-                  {game?.takeawayHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                  <span>{game?.takeawayHidden ? 'Show Takeaway' : 'Hide Takeaway'}</span>
-                </button>
-                <select
-                  aria-label="Select presented paper"
-                  value={game?.selectedLessonIndex ?? 0}
-                  onChange={(e) => handleSelectPaper(parseInt(e.target.value, 10) || 0)}
-                  className="px-2.5 py-1.5 rounded-xl bg-purple-900 border border-orange-400/50 text-xs font-mono text-orange-200 focus:outline-none cursor-pointer"
-                  title="Silently switch which paper is shown on the shared screen"
-                >
-                  {lessonPaperOptions.map((label, idx) => (
-                    <option key={label} value={idx}>{label}</option>
-                  ))}
-                </select>
-              </>
+            {isTakeawayPhase && (
+              <button
+                type="button"
+                onClick={handleToggleTakeawayHidden}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all ${
+                  game?.takeawayHidden
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-400'
+                    : 'bg-purple-900 hover:bg-purple-800 text-purple-100 border-purple-700'
+                }`}
+                title={game?.takeawayHidden ? 'Reveal takeaway screen to all players' : 'Hide takeaway screen from all players'}
+              >
+                {game?.takeawayHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{game?.takeawayHidden ? 'Show Takeaway' : 'Hide Takeaway'}</span>
+              </button>
             )}
             <div className="px-3 py-1.5 rounded-xl bg-purple-900 border border-purple-700 flex items-center gap-2 font-mono text-sm font-black text-orange-300">
               <Timer className="w-4 h-4" />
@@ -651,49 +656,128 @@ export default function PresenterNotes() {
             )}
           </div>
 
-          {/* Right: Live Private Tribute Monitor */}
-          <div className="lg:col-span-5 p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3 self-start">
-            <div className="flex items-center justify-between">
-              <div className="text-xs font-mono uppercase font-bold text-orange-400 flex items-center gap-1.5">
-                <Users className="w-4 h-4" />
-                Live Tributes ({tributes.length}/15)
+          {/* Right Column: Live Private Tribute Monitor + Collapsible Research Quick Facts */}
+          <div className="lg:col-span-5 space-y-4 self-start">
+            <div className="p-5 rounded-2xl bg-purple-950/90 border border-purple-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-mono uppercase font-bold text-orange-400 flex items-center gap-1.5">
+                  <Users className="w-4 h-4" />
+                  Live Tributes ({tributes.length}/15)
+                </div>
+                <span className="text-[11px] font-mono text-purple-400">Phase: {phase}</span>
               </div>
-              <span className="text-[11px] font-mono text-purple-400">Phase: {phase}</span>
+
+              <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                {sortedTributes.map((t) => {
+                  const dist = DISTRICTS.find(d => d.id === t.districtId) || DISTRICTS[0];
+                  const p1 = game?.choices?.[t.id];
+                  const p2 = game?.p2Choices?.[t.id];
+                  const p3L = game?.p3Locations?.[t.id];
+                  const p3A = game?.p3Actions?.[t.id];
+                  const p4 = game?.p4Fire?.[t.id];
+                  return (
+                    <div key={t.id} className="p-3 rounded-xl bg-purple-900/60 border border-purple-800 text-xs space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-white truncate">
+                          {t.realName} <span className="text-purple-400 font-normal">({dist.name})</span>
+                        </span>
+                        <span className="font-mono font-black text-orange-300 shrink-0">
+                          {t.totalScore ?? 0} pts
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 text-[10px] font-mono text-purple-300">
+                        {t.allianceName && <span className="px-1.5 py-0.5 rounded bg-purple-800">{t.allianceName}</span>}
+                        {t.arenaTool && <span className="px-1.5 py-0.5 rounded bg-orange-900/70 text-orange-200">🛠️ Tool</span>}
+                        {p1 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P1: {p1.strategy} ({p1.responseTime}s)</span>}
+                        {p2 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P2: {p2.choice}</span>}
+                        {p3L && <span className="px-1.5 py-0.5 rounded bg-purple-800">P3: {p3L}{p3A ? `/${p3A}` : ''}</span>}
+                        {p4 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P4: {p4}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+                {sortedTributes.length === 0 && (
+                  <p className="text-xs text-purple-400 italic text-center py-6">
+                    No tributes joined yet.
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-2 max-h-[540px] overflow-y-auto pr-1">
-              {sortedTributes.map((t) => {
-                const dist = DISTRICTS.find(d => d.id === t.districtId) || DISTRICTS[0];
-                const p1 = game?.choices?.[t.id];
-                const p2 = game?.p2Choices?.[t.id];
-                const p3L = game?.p3Locations?.[t.id];
-                const p3A = game?.p3Actions?.[t.id];
-                const p4 = game?.p4Fire?.[t.id];
-                return (
-                  <div key={t.id} className="p-3 rounded-xl bg-purple-900/60 border border-purple-800 text-xs space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-white truncate">
-                        {t.realName} <span className="text-purple-400 font-normal">({dist.name})</span>
-                      </span>
-                      <span className="font-mono font-black text-orange-300 shrink-0">
-                        {t.totalScore ?? 0} pts
-                      </span>
+            {/* Collapsible Research Quick Facts Box (Right Below Scores) */}
+            <div className="rounded-2xl bg-purple-950/90 border border-orange-400/40 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowResearchFacts(!showResearchFacts)}
+                className="w-full px-5 py-3.5 flex items-center justify-between gap-2 text-left hover:bg-purple-900/60 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <FlaskConical className="w-4 h-4 text-orange-400 shrink-0" />
+                  <div>
+                    <div className="text-xs font-mono uppercase font-bold text-orange-400">
+                      Research Quick Facts
                     </div>
-                    <div className="flex flex-wrap gap-1.5 text-[10px] font-mono text-purple-300">
-                      {t.allianceName && <span className="px-1.5 py-0.5 rounded bg-purple-800">{t.allianceName}</span>}
-                      {t.arenaTool && <span className="px-1.5 py-0.5 rounded bg-orange-900/70 text-orange-200">🛠️ Tool</span>}
-                      {p1 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P1: {p1.strategy} ({p1.responseTime}s)</span>}
-                      {p2 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P2: {p2.choice}</span>}
-                      {p3L && <span className="px-1.5 py-0.5 rounded bg-purple-800">P3: {p3L}{p3A ? `/${p3A}` : ''}</span>}
-                      {p4 && <span className="px-1.5 py-0.5 rounded bg-purple-800">P4: {p4}</span>}
+                    <div className="text-[11px] text-purple-300">
+                      Sample size, experiment design &amp; stats (click to {showResearchFacts ? 'collapse' : 'expand'})
                     </div>
                   </div>
-                );
-              })}
-              {sortedTributes.length === 0 && (
-                <p className="text-xs text-purple-400 italic text-center py-6">
-                  No tributes joined yet.
-                </p>
+                </div>
+                {showResearchFacts ? (
+                  <ChevronUp className="w-4 h-4 text-orange-300 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-orange-300 shrink-0" />
+                )}
+              </button>
+
+              {showResearchFacts && (
+                <div className="px-5 pb-5 pt-2 border-t border-purple-800 space-y-3">
+                  {/* Quick Switch between Paper 1 & Paper 2 Facts */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {(['p1', 'p3']).map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedFactsTab(key)}
+                        className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all border ${
+                          selectedFactsTab === key
+                            ? 'bg-orange-600 text-white border-orange-500'
+                            : 'bg-purple-900/70 text-purple-200 border-purple-800 hover:border-purple-600'
+                        }`}
+                      >
+                        {RESEARCH_QUICK_FACTS[key].label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="text-xs font-black font-cinzel text-white leading-snug">
+                      {currentFacts.title}
+                    </div>
+                    <div className="text-[11px] font-mono text-purple-300">
+                      {currentFacts.authors} • {currentFacts.journal}
+                    </div>
+                    <a
+                      href={currentFacts.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-mono text-orange-300 hover:text-orange-200 underline"
+                    >
+                      <span>Open Full Paper</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    {currentFacts.facts.map((item) => (
+                      <div key={item.key} className="p-2.5 rounded-xl bg-purple-900/60 border border-purple-800/90 text-xs">
+                        <span className="font-mono font-bold text-orange-300 uppercase text-[10px] block mb-0.5">
+                          {item.key}
+                        </span>
+                        <span className="text-purple-100 leading-relaxed">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>

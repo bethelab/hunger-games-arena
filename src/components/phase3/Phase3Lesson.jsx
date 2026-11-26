@@ -193,39 +193,6 @@ const PHASE3_PAPERS = [
     citation: 'Taş, Maknoon, & Rezaei (2026, Annual Review of Psychology) • Read Paper',
     paperUrl: 'https://www.annualreviews.org/content/journals/10.1146/annurev-psych-091924-040158',
     slides: PHASE3_TIME_BIASES_SLIDES
-  },
-  {
-    shortTitle: 'Risk Perception (Perlstein, 2023)',
-    title: 'Risk perception',
-    description: "Our feelings about danger don't always match the actual level of risk.",
-    presenterDetail:
-      'Perlstein (2023) explored how people interpret and discuss uncertain risks. Clear mountain water feels safe, while travel danger feels less obvious until it hits.',
-    citation: 'Perlstein, 2023',
-    paperUrl: 'https://scholar.google.com/scholar?q=Perlstein+2023+Risk+perception+and+interpersonal+discussion+on+risk',
-    illustration: (
-      <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 34 Q42 14 64 34 Q42 54 20 34 Z" fill="#F3E8FF" stroke="#6B21A8" strokeWidth="2" />
-        <circle cx="42" cy="34" r="7" fill="#4C1D95" />
-        <path d="M84 18 L102 50 L66 50 Z" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2.2" strokeLinejoin="round" />
-        <text x="84" y="45" textAnchor="middle" fill="#C2410C" fontSize="14" fontWeight="bold">!</text>
-      </svg>
-    )
-  },
-  {
-    shortTitle: 'Effort & Reward (Harmon-Jones et al., 2024)',
-    title: 'Effort & reward value',
-    description: 'How effort changes how much we value an outcome depends partly on perceived control.',
-    presenterDetail:
-      'Harmon-Jones et al. (2024) found effort-reward valuation depends on perceived control. Relatedly, Campbell, Wang & Inzlicht (2025, 6 studies, n = 2,883) showed exerting effort increases perceived meaning.',
-    citation: 'Harmon-Jones et al., 2024',
-    paperUrl: 'https://scholar.google.com/scholar?q=Harmon-Jones+2024+Does+effort+increase+or+decrease+reward+valuation',
-    illustration: (
-      <svg viewBox="0 0 120 68" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 54 L46 38 L66 42 L94 18" stroke="#6B21A8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="94" cy="18" r="9" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2" />
-        <text x="94" y="22" textAnchor="middle" fill="#C2410C" fontSize="11" fontWeight="bold">★</text>
-      </svg>
-    )
   }
 ];
 

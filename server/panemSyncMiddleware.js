@@ -885,10 +885,10 @@ export function createPanemSyncMiddleware() {
             timerState.running = false
             timerState.countdown = gameState.durationSeconds
             if (gameState.phase === 'lesson') gameState.completedPhase = Math.max(gameState.completedPhase, 1)
-            else if (gameState.phase === 'p2_lesson') gameState.completedPhase = Math.max(gameState.completedPhase, 2)
+            else if (gameState.phase === 'p2_lesson' || gameState.phase === 'p2_alliances') gameState.completedPhase = Math.max(gameState.completedPhase, 2)
             else if (gameState.phase === 'p3_lesson') gameState.completedPhase = Math.max(gameState.completedPhase, 3)
-            else if (gameState.phase === 'p4_lesson') gameState.completedPhase = Math.max(gameState.completedPhase, 4)
-            else if (gameState.phase === 'p5_lesson' || gameState.phase === 'finale') gameState.completedPhase = Math.max(gameState.completedPhase, 5)
+            else if (gameState.phase === 'p4_lesson' || gameState.phase === 'p4_outcome') gameState.completedPhase = Math.max(gameState.completedPhase, 4)
+            else if (gameState.phase === 'p5_lesson' || gameState.phase === 'p5_winner' || gameState.phase === 'finale') gameState.completedPhase = Math.max(gameState.completedPhase, 5)
             gameState.phase = 'lobby'
           } else if (action === 'start_p2_intro') {
             const p2Secs = typeof durationSeconds === 'number' ? durationSeconds : 60

@@ -231,44 +231,6 @@ const PHASE1_PAPERS = [
     citation: 'Young, Goodie, Hall, & Wu (2012, OBHDP) • Read Full Paper (PMC)',
     paperUrl: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC3375992/',
     slides: TIME_PRESSURE_SLIDES
-  },
-  {
-    shortTitle: 'Risk Perception (Perlstein, 2023)',
-    title: 'Risk perception',
-    description: 'Risk judgments are influenced by social discussion and how people interpret danger.',
-    presenterDetail:
-      'Perlstein (2023) systematically reviewed how interpersonal discussion shapes risk perception. In the arena, how dangerous the Cornucopia feels depends on how we interpret the threat, not just the math.',
-    citation: 'Perlstein, 2023',
-    paperUrl: 'https://scholar.google.com/scholar?q=Perlstein+2023+Risk+perception+and+interpersonal+discussion+on+risk+systematic+literature+review',
-    illustration: (
-      <svg viewBox="0 0 120 72" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 36 Q46 16 70 36 Q46 56 22 36 Z" fill="#F3E8FF" stroke="#6B21A8" strokeWidth="2" />
-        <circle cx="46" cy="36" r="7" fill="#4C1D95" />
-        <path d="M90 18 L106 52 L74 52 Z" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2.2" strokeLinejoin="round" />
-        <text x="90" y="47" textAnchor="middle" fill="#C2410C" fontSize="14" fontWeight="bold">!</text>
-      </svg>
-    )
-  },
-  {
-    shortTitle: 'Social Influence (Bergquist & Ekelund, 2025)',
-    title: 'Social influence',
-    description: 'Social norms can become particularly influential when people face uncertainty.',
-    presenterDetail:
-      'Bergquist & Ekelund (2025) explored how emotion regulation interacts with normative social influence under uncertainty. When the clock is ticking, what others appear to be doing pulls our choices.',
-    citation: 'Bergquist & Ekelund, 2025',
-    paperUrl: 'https://scholar.google.com/scholar?q=Bergquist+Ekelund+2025+role+of+emotion+regulation+in+normative+influence+under+uncertainty',
-    illustration: (
-      <svg viewBox="0 0 120 72" className="w-full h-16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {[18, 40, 62, 102].map((x) => (
-          <g key={x}>
-            <circle cx={x} cy="24" r="6" fill="#DDD6FE" stroke="#4C1D95" strokeWidth="1.8" />
-            <path d={`M${x - 7} 48 C${x - 7} 36 ${x + 7} 36 ${x + 7} 48`} fill="#EDE9FE" stroke="#4C1D95" strokeWidth="1.8" />
-          </g>
-        ))}
-        <circle cx="82" cy="24" r="6.5" fill="#EA580C" />
-        <path d="M74 48 C74 35 90 35 90 48" fill="#FFEDD5" stroke="#EA580C" strokeWidth="2" />
-      </svg>
-    )
   }
 ];
 

@@ -233,7 +233,7 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
                       In <strong>The Hunger Games</strong>, tributes enter an unpredictable arena with limited time, incomplete information, and tough choices.
                     </p>
                     <p>
-                      Today, <strong>up to 15 players</strong> will step into the arena facing high-pressure scenarios inspired by the book and movie. Real psychology research on how humans think, trust, and react related to each scenario will then be presented.
+                      Today, <strong>up to 15 players</strong> will step into the arena facing high-pressure scenarios inspired by the book and movie. Real psychology research on how humans think, trust, and react will then be presented.
                     </p>
                   </div>
 
@@ -344,18 +344,18 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
               </div>
             )}
 
-            {/* SLIDE 4: 5 PHASES & 2 PAPERS (Unified Purple vs Warm Orange Preview) */}
+            {/* SLIDE 4: 5 PHASES & 1 PAPER (Unified Purple vs Warm Orange Preview) */}
             {slideIndex === 4 && (
               <div className="bg-white rounded-3xl border-2 border-purple-200 shadow-xl p-6 sm:p-10 space-y-5">
                 <div className="space-y-1.5">
                   <span className="inline-block px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-[11px] font-bold font-mono-capitol uppercase">
-                    4 / 6 • 5 Phases &amp; 2 Papers
+                    4 / 6 • 5 Phases &amp; 1 Paper
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-purple-950">
-                    5 Phases • 2 Psychology Papers
+                    5 Phases • 1 Psychology Paper
                   </h2>
                   <p className="text-xs sm:text-sm text-purple-700">
-                    Each phase is revealed as we go, followed by a short psychology takeaway.
+                    Each phase is revealed as we go, followed by a psychology takeaway after the survival rounds.
                   </p>
                 </div>
 

@@ -181,7 +181,7 @@ export default function Phase4Outcome({
             onClick={onShowLesson}
             className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-purple-800 hover:opacity-95 text-white font-black text-sm uppercase tracking-wider shadow-lg inline-flex items-center gap-2 transition-all"
           >
-            Return to The Woods (Next: Phase 5)
+            Share Psychology Takeaway
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

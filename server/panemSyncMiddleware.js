@@ -884,9 +884,9 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'back_to_lobby') {
             timerState.running = false
             timerState.countdown = gameState.durationSeconds
-            if (gameState.phase === 'lesson') gameState.completedPhase = Math.max(gameState.completedPhase, 1)
+            if (gameState.phase === 'lesson' || gameState.phase === 'consequences') gameState.completedPhase = Math.max(gameState.completedPhase, 1)
             else if (gameState.phase === 'p2_lesson' || gameState.phase === 'p2_alliances') gameState.completedPhase = Math.max(gameState.completedPhase, 2)
-            else if (gameState.phase === 'p3_lesson') gameState.completedPhase = Math.max(gameState.completedPhase, 3)
+            else if (gameState.phase === 'p3_lesson' || gameState.phase === 'p3_outcome') gameState.completedPhase = Math.max(gameState.completedPhase, 3)
             else if (gameState.phase === 'p4_lesson' || gameState.phase === 'p4_outcome') gameState.completedPhase = Math.max(gameState.completedPhase, 4)
             else if (gameState.phase === 'p5_lesson' || gameState.phase === 'p5_winner' || gameState.phase === 'finale') gameState.completedPhase = Math.max(gameState.completedPhase, 5)
             gameState.phase = 'lobby'
@@ -1000,7 +1000,7 @@ export function createPanemSyncMiddleware() {
           } else if (action === 'show_p4_lesson') {
             gameState.selectedLessonIndex = 0
             gameState.takeawaySlideIndex = 0
-            gameState.takeawayHidden = true
+            gameState.takeawayHidden = false
             gameState.phase = 'p4_lesson'
           } else if (action === 'start_p5_intro') {
             const p5Secs = typeof durationSeconds === 'number' ? durationSeconds : 60

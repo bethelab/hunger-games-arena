@@ -577,7 +577,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           tributes={tributes}
           poll={game?.poll}
           scaledRisks={game?.scaledRisks}
-          onShowLesson={handleShowLesson}
+          onShowLesson={handleBackToLobby}
         />
       )}
       {phase === 'lesson' && !hideTakeawayToArena && (
@@ -675,7 +675,7 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           tributes={tributes}
           locationPoll={game?.p3LocationPoll}
           actionPoll={game?.p3ActionPoll}
-          onShowLesson={handleShowPhase3Lesson}
+          onShowLesson={handleBackToLobby}
         />
       )}
       {phase === 'p3_lesson' && !hideTakeawayToArena && (
@@ -729,15 +729,17 @@ export default function ArenaLobby({ currentTribute, onNavigate }) {
           tributes={tributes}
           firePoll={game?.p4FirePoll}
           feastPoll={game?.p4FeastPoll}
-          onShowLesson={handleBackToLobby}
+          onShowLesson={handleShowPhase4Lesson}
         />
       )}
       {phase === 'p4_lesson' && !hideTakeawayToArena && (
         <Phase4Lesson
           isGamemaker={effectiveIsGamemaker}
           selectedTopicIndex={selectedLessonIndex}
+          takeawaySlideIndex={game?.takeawaySlideIndex ?? 0}
           takeawayHidden={Boolean(game?.takeawayHidden)}
           onSelectTopic={handleSelectLessonTopic}
+          onChangeTakeawaySlide={(idx) => syncService.controlGame('set_takeaway_slide', undefined, { index: idx })}
           onToggleHidden={() => syncService.controlGame('toggle_takeaway_hidden')}
           onBackToWoods={handleBackToLobby}
         />

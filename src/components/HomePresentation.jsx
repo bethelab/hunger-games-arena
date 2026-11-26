@@ -344,15 +344,15 @@ export default function HomePresentation({ tributeData, game, onGamemakerAuth, o
               </div>
             )}
 
-            {/* SLIDE 4: 5 PHASES & 5 PAPERS (Unified Purple vs Warm Orange Preview) */}
+            {/* SLIDE 4: 5 PHASES & 3 PAPERS (Unified Purple vs Warm Orange Preview) */}
             {slideIndex === 4 && (
               <div className="bg-white rounded-3xl border-2 border-purple-200 shadow-xl p-6 sm:p-10 space-y-5">
                 <div className="space-y-1.5">
                   <span className="inline-block px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-[11px] font-bold font-mono-capitol uppercase">
-                    4 / 6 • 5 Phases &amp; 5 Papers
+                    4 / 6 • 5 Phases &amp; 3 Papers
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-purple-950">
-                    5 Phases • 5 Psychology Papers
+                    5 Phases • 3 Psychology Papers
                   </h2>
                   <p className="text-xs sm:text-sm text-purple-700">
                     Each phase is revealed as we go, followed by a short psychology takeaway.

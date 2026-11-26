@@ -1,29 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Countdown from '../phase1/Countdown';
 import { Flame, CheckCircle2, BarChart3, Zap, Lock } from 'lucide-react';
 
-const ALL_EVENT_CARDS = [
+// Intentionally NO points or probabilities shown before voting
+const FIRE_CARDS = [
   {
-    id: 'stay',
+    id: 'downhill',
     letter: 'A',
-    icon: '🛡️',
-    title: 'Stay where you are',
-    description: "You know the area and don't want to risk travelling somewhere unfamiliar."
+    icon: '⛰️',
+    title: 'Move downhill',
+    description: 'Head quickly for lower ground to get below the rising heat and thick smoke.'
   },
   {
-    id: 'river',
+    id: 'tree',
     letter: 'B',
-    icon: '🌊',
-    title: 'Run towards the river',
-    description: 'You might escape the fire, but the route is unfamiliar.'
+    icon: '🌳',
+    title: 'Climb a tree',
+    description: 'Scale the nearest tall tree to get above the undergrowth and spot a way out.'
   },
   {
-    id: 'alliance',
+    id: 'ditch',
     letter: 'C',
-    icon: '🤝',
-    title: 'Find your alliance',
-    description: 'Reunite with your partner before making a move. Strength in numbers, but it could cost valuable time.',
-    requiresAlliance: true
+    icon: '🎒',
+    title: 'Ditch your gear',
+    description: 'Drop your heavy pack immediately so you can outrun the advancing wall of flames.'
   }
 ];
 
@@ -34,17 +34,16 @@ function getPct(count, total) {
 
 export default function Phase4Event({
   isGamemaker,
-  isInAlliance,
   countdown,
   duration,
-  myInitial,
+  myFireChoice,
   poll,
-  onSubmitInitial,
-  onTriggerTwist
+  onSubmitFire,
+  onTriggerFeast
 }) {
+  const [feastSeconds, setFeastSeconds] = useState(25);
   const totalVoted = poll?.totalVoted || 0;
   const totalTributes = poll?.totalTributes || 0;
-  const cards = ALL_EVENT_CARDS.filter(c => !c.requiresAlliance || isInAlliance);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-5">
@@ -54,7 +53,7 @@ export default function Phase4Event({
         <Flame className="w-6 h-6 shrink-0 animate-pulse" />
         <div>
           <div className="text-[10px] font-mono-capitol font-bold uppercase tracking-widest text-orange-100">
-            Arena Alert
+            Arena Alert • Event 1 of 2
           </div>
           <div className="text-base sm:text-xl font-black font-cinzel tracking-wide">
             A WALL OF FIRE IS APPROACHING!
@@ -69,7 +68,7 @@ export default function Phase4Event({
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold font-mono-capitol uppercase text-orange-600">
                 <BarChart3 className="w-4 h-4" />
-                Initial Response • Live Anonymous Poll
+                Fire Disaster • Live Anonymous Poll
               </div>
               <h2 className="text-xl sm:text-2xl font-black font-cinzel text-purple-950">
                 How Are Tributes Reacting?
@@ -82,9 +81,9 @@ export default function Phase4Event({
 
           <div className="space-y-3.5">
             {[
-              { id: 'stay', icon: '🛡️', label: 'stayed where they are.', count: poll?.stay || 0, color: 'bg-purple-900' },
-              { id: 'river', icon: '🌊', label: 'ran towards the river.', count: poll?.river || 0, color: 'bg-orange-500' },
-              { id: 'alliance', icon: '🤝', label: 'went to find their alliance.', count: poll?.alliance || 0, color: 'bg-purple-600' }
+              { id: 'downhill', icon: '⛰️', label: 'moved downhill.', count: poll?.downhill || 0, color: 'bg-purple-800' },
+              { id: 'tree', icon: '🌳', label: 'climbed a tree.', count: poll?.tree || 0, color: 'bg-orange-500' },
+              { id: 'ditch', icon: '🎒', label: 'ditched their gear.', count: poll?.ditch || 0, color: 'bg-purple-600' }
             ].map((item) => {
               const pct = getPct(item.count, totalVoted);
               return (
@@ -110,15 +109,24 @@ export default function Phase4Event({
           </div>
 
           <div className="pt-3 border-t border-purple-100 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[11px] text-purple-500 font-mono-capitol">
-              Not responding before time runs out costs -8 pts!
-            </p>
+            <div className="flex items-center gap-1.5 text-xs font-mono text-purple-700">
+              <span>Feast timer:</span>
+              <input
+                type="number"
+                min={10}
+                max={180}
+                value={feastSeconds}
+                onChange={(e) => setFeastSeconds(Math.max(10, Math.min(180, parseInt(e.target.value, 10) || 25)))}
+                className="w-14 px-1.5 py-1 rounded-lg border border-purple-300 text-center font-bold text-purple-950"
+              />
+              <span>s</span>
+            </div>
             <button
-              onClick={onTriggerTwist}
+              onClick={() => onTriggerFeast(feastSeconds)}
               className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-purple-800 hover:opacity-95 text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm transition-all"
             >
               <Zap className="w-3.5 h-3.5" />
-              Trigger Random Twist (15s)
+              Next: Launch The Feast ({feastSeconds}s)
             </button>
           </div>
         </div>
@@ -128,18 +136,17 @@ export default function Phase4Event({
             Decide before the timer hits 0 — freezing up costs -8 points!
           </p>
 
-          <div className={`grid grid-cols-1 ${cards.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : 'md:grid-cols-3'} gap-4`}>
-            {cards.map((card) => {
-              const lockedMove = myInitial?.move;
-              const isSelected = lockedMove === card.id;
-              const isLockedOther = Boolean(lockedMove) && !isSelected;
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {FIRE_CARDS.map((card) => {
+              const isSelected = myFireChoice === card.id;
+              const isLockedOther = Boolean(myFireChoice) && !isSelected;
 
               return (
                 <button
                   key={card.id}
                   type="button"
-                  disabled={Boolean(lockedMove)}
-                  onClick={() => onSubmitInitial(card.id)}
+                  disabled={Boolean(myFireChoice)}
+                  onClick={() => onSubmitFire(card.id)}
                   className={`text-left p-5 rounded-3xl border-2 transition-all flex flex-col justify-between gap-3 min-h-[165px] ${
                     isSelected
                       ? 'bg-orange-50 border-orange-500 shadow-lg ring-4 ring-orange-300/40'
@@ -174,11 +181,11 @@ export default function Phase4Event({
             })}
           </div>
 
-          {myInitial && (
+          {myFireChoice && (
             <div className="text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono-capitol">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Move locked in — Stay alert...</span>
+                <span>Move locked in — Stay alert for Event 2...</span>
                 <Lock className="w-3.5 h-3.5" />
               </div>
             </div>

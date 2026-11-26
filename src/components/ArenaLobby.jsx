@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import QRCode from 'qrcode';
 import AvatarRenderer from './AvatarRenderer';
@@ -54,7 +54,7 @@ const P3_LOC_BADGE = {
   stream: '⛰️ Stream'
 };
 
-export default function ArenaLobby({ currentTribute }) {
+export default function ArenaLobby({ currentTribute, onNavigate }) {
   const [tributes, setTributes] = useState([]);
   const [timer, setTimer] = useState({ running: false, countdown: 30, duration: 30, visible: false });
   const [game, setGame] = useState(syncService.getGame());
@@ -65,6 +65,7 @@ export default function ArenaLobby({ currentTribute }) {
   const [copied, setCopied] = useState(false);
   const [hasCelebratedEntry, setHasCelebratedEntry] = useState(false);
   const [viewAsPlayer, setViewAsPlayer] = useState(false);
+  const initialResetTokenRef = useRef(null);
 
   const isGamemaker = currentTribute?.role === 'gamemaker';
   // Gamemaker keeps all header controls, but can toggle screen content between Gamemaker view and Player view
@@ -93,6 +94,24 @@ export default function ArenaLobby({ currentTribute }) {
     );
     return () => unsubscribe();
   }, [isGamemaker, inTheWoods]);
+
+  // When Gamemaker resets the arena, force all players (not Gamemaker) back to the beginning
+  useEffect(() => {
+    const token = game?.resetToken || 0;
+    if (initialResetTokenRef.current === null) {
+      initialResetTokenRef.current = token;
+      return;
+    }
+    if (!isGamemaker && token > initialResetTokenRef.current) {
+      initialResetTokenRef.current = token;
+      try {
+        sessionStorage.removeItem("panem_tribute_session_v4");
+      } catch (e) {}
+      if (onNavigate) onNavigate('reaping');
+      window.location.hash = '#/reaping';
+      window.location.reload();
+    }
+  }, [game?.resetToken, isGamemaker, onNavigate]);
 
   // Register current tribute on pedestal (Tributes only; Gamemaker does not take a pedestal)
   useEffect(() => {
@@ -156,10 +175,16 @@ export default function ArenaLobby({ currentTribute }) {
   };
 
   const handleResetArena = () => {
-    if (confirm("Reset the arena? This will clear all tributes and reset the timer.")) {
+    if (confirm("Reset the arena? All players will be removed and sent back to the start, while you remain Gamemaker.")) {
       sound.playCannon();
       syncService.controlTimer('reset_arena');
     }
+  };
+
+  // Gamemaker: select which 1 of the 3 papers is featured on takeaway slides
+  const handleSelectLessonTopic = (index) => {
+    sound.playBeep();
+    syncService.controlGame('select_lesson_topic', undefined, { index });
   };
 
   // Phase 1 Controls
@@ -183,17 +208,17 @@ export default function ArenaLobby({ currentTribute }) {
   const handleRevealPhase3Outcomes = () => { sound.playCannon(); syncService.controlGame('reveal_p3_outcome'); };
   const handleShowPhase3Lesson = () => { sound.playBeep(); syncService.controlGame('show_p3_lesson'); };
 
-  // Phase 4 Controls
+  // Phase 4 Controls (Fire + The Feast)
   const handleStartPhase4Intro = () => { sound.playBeep(); syncService.controlGame('start_p4_intro', 30); };
   const handleStartPhase4Event = (secs) => { sound.playCannon(); syncService.controlGame('start_p4_event', secs || 30); };
-  const handleTriggerPhase4Twist = () => { sound.playCannon(); syncService.controlGame('trigger_p4_twist'); };
+  const handleTriggerPhase4Feast = (secs) => { sound.playCannon(); syncService.controlGame('trigger_p4_twist', secs || 25); };
   const handleRevealPhase4Outcomes = () => { sound.playCannon(); syncService.controlGame('reveal_p4_outcome'); };
   const handleShowPhase4Lesson = () => { sound.playBeep(); syncService.controlGame('show_p4_lesson'); };
 
   // Phase 5 & Finale Controls
   const handleStartPhase5Intro = () => { sound.playBeep(); syncService.controlGame('start_p5_intro', 60); };
   const handleStartPhase5Pitch = (secs) => { sound.playCannon(); syncService.controlGame('start_p5_pitch', secs || 60); };
-  const handleStartPhase5Vote = () => { sound.playBeep(); syncService.controlGame('start_p5_vote'); };
+  const handleStartPhase5Vote = (secs) => { sound.playBeep(); syncService.controlGame('start_p5_vote', secs || 45); };
   const handleRevealPhase5Winner = () => { sound.playCannon(); syncService.controlGame('reveal_p5_winner'); };
   const handleShowPhase5Lesson = () => { sound.playBeep(); syncService.controlGame('show_p5_lesson'); };
   const handleShowFinale = () => { sound.playCannon(); syncService.controlGame('show_finale'); };
@@ -223,16 +248,16 @@ export default function ArenaLobby({ currentTribute }) {
     syncService.submitVote(currentTribute.id, act, 'phase3_purify');
   };
 
-  const handleSubmitPhase4Initial = (move) => {
+  const handleSubmitPhase4Fire = (move) => {
     if (!currentTribute?.id) return;
     sound.playBeep();
-    syncService.submitVote(currentTribute.id, move, 'phase4_initial');
+    syncService.submitVote(currentTribute.id, move, 'phase4_fire');
   };
 
-  const handleSubmitPhase4Rethink = (action, newMove) => {
+  const handleSubmitPhase4Feast = (move) => {
     if (!currentTribute?.id) return;
     sound.playBeep();
-    syncService.submitVote(currentTribute.id, action, 'phase4_twist', { newMove });
+    syncService.submitVote(currentTribute.id, move, 'phase4_feast');
   };
 
   const handleSubmitPhase5Pitch = (pitch) => {
@@ -267,8 +292,9 @@ export default function ArenaLobby({ currentTribute }) {
   const myP2Choice = currentTribute?.id ? game?.p2Choices?.[currentTribute.id] : null;
   const myP3Location = currentTribute?.id ? game?.p3Locations?.[currentTribute.id] : null;
   const myP3Action = currentTribute?.id ? game?.p3Actions?.[currentTribute.id] : null;
-  const myP4Initial = currentTribute?.id ? game?.p4Initial?.[currentTribute.id] : null;
-  const myP4Rethink = currentTribute?.id ? game?.p4Rethink?.[currentTribute.id] : null;
+  const myP4Fire = currentTribute?.id ? game?.p4Fire?.[currentTribute.id] : null;
+  const myP4Feast = currentTribute?.id ? game?.p4Feast?.[currentTribute.id] : null;
+  const selectedLessonIndex = game?.selectedLessonIndex ?? 0;
   const myP5Pitch = currentTribute?.id ? game?.p5Pitches?.[currentTribute.id] : null;
   const myP5Vote = currentTribute?.id ? game?.p5Votes?.[currentTribute.id] : null;
   const formattedTime = `${Math.floor(timer.countdown / 60).toString().padStart(2, '0')}:${(timer.countdown % 60).toString().padStart(2, '0')}`;
@@ -555,6 +581,8 @@ export default function ArenaLobby({ currentTribute }) {
       {phase === 'lesson' && (
         <LessonReveal
           isGamemaker={effectiveIsGamemaker}
+          selectedTopicIndex={selectedLessonIndex}
+          onSelectTopic={handleSelectLessonTopic}
           onBackToLobby={handleBackToLobby}
         />
       )}
@@ -592,6 +620,8 @@ export default function ArenaLobby({ currentTribute }) {
       {phase === 'p2_lesson' && (
         <Phase2Lesson
           isGamemaker={effectiveIsGamemaker}
+          selectedTopicIndex={selectedLessonIndex}
+          onSelectTopic={handleSelectLessonTopic}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -643,11 +673,13 @@ export default function ArenaLobby({ currentTribute }) {
       {phase === 'p3_lesson' && (
         <Phase3Lesson
           isGamemaker={effectiveIsGamemaker}
+          selectedTopicIndex={selectedLessonIndex}
+          onSelectTopic={handleSelectLessonTopic}
           onBackToWoods={handleBackToLobby}
         />
       )}
 
-      {/* Phase 4 */}
+      {/* Phase 4 (Fire Disaster + The Feast) */}
       {phase === 'p4_intro' && (
         <Phase4Intro
           isGamemaker={effectiveIsGamemaker}
@@ -659,26 +691,22 @@ export default function ArenaLobby({ currentTribute }) {
       {phase === 'p4_event' && (
         <Phase4Event
           isGamemaker={effectiveIsGamemaker}
-          isInAlliance={isInAlliance}
           countdown={timer.countdown}
           duration={timer.duration || 30}
-          myInitial={myP4Initial}
-          poll={game?.p4InitialPoll}
-          onSubmitInitial={handleSubmitPhase4Initial}
-          onTriggerTwist={handleTriggerPhase4Twist}
+          myFireChoice={myP4Fire}
+          poll={game?.p4FirePoll}
+          onSubmitFire={handleSubmitPhase4Fire}
+          onTriggerFeast={handleTriggerPhase4Feast}
         />
       )}
       {phase === 'p4_twist' && (
         <Phase4Twist
           isGamemaker={effectiveIsGamemaker}
-          isInAlliance={isInAlliance}
           countdown={timer.countdown}
-          duration={timer.duration || 15}
-          twist={game?.p4Twist}
-          myInitial={myP4Initial}
-          myRethink={myP4Rethink}
-          poll={game?.p4TwistPoll}
-          onSubmitRethink={handleSubmitPhase4Rethink}
+          duration={timer.duration || 25}
+          myFeastChoice={myP4Feast}
+          poll={game?.p4FeastPoll}
+          onSubmitFeast={handleSubmitPhase4Feast}
           onRevealOutcomes={handleRevealPhase4Outcomes}
         />
       )}
@@ -687,15 +715,16 @@ export default function ArenaLobby({ currentTribute }) {
           isGamemaker={effectiveIsGamemaker}
           currentTribute={currentTribute}
           tributes={tributes}
-          twist={game?.p4Twist}
-          initialPoll={game?.p4InitialPoll}
-          twistPoll={game?.p4TwistPoll}
+          firePoll={game?.p4FirePoll}
+          feastPoll={game?.p4FeastPoll}
           onShowLesson={handleShowPhase4Lesson}
         />
       )}
       {phase === 'p4_lesson' && (
         <Phase4Lesson
           isGamemaker={effectiveIsGamemaker}
+          selectedTopicIndex={selectedLessonIndex}
+          onSelectTopic={handleSelectLessonTopic}
           onBackToWoods={handleBackToLobby}
         />
       )}
@@ -747,6 +776,8 @@ export default function ArenaLobby({ currentTribute }) {
       {phase === 'p5_lesson' && (
         <Phase5Lesson
           isGamemaker={effectiveIsGamemaker}
+          selectedTopicIndex={selectedLessonIndex}
+          onSelectTopic={handleSelectLessonTopic}
           onShowFinale={handleShowFinale}
         />
       )}

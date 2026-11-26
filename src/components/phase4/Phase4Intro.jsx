@@ -22,6 +22,7 @@ export default function Phase4Intro({ isGamemaker, durationSeconds, tributeCount
           The Gamemakers&apos; Twist
         </h1>
 
+        {/* Detailed phase explanation WITHOUT giving away the surprise scenarios or options */}
         <div className="bg-purple-50/70 border border-purple-100 rounded-2xl p-5 sm:p-6 text-left space-y-3 text-sm sm:text-base text-purple-900 leading-relaxed italic">
           <p>
             &ldquo;Tributes, you have made it this far. Some of you have found allies, gathered resources and developed strategies.
@@ -30,11 +31,16 @@ export default function Phase4Intro({ isGamemaker, durationSeconds, tributeCount
             But perhaps you&apos;ve forgotten something important. You are not in control of this arena. We are.
           </p>
           <p>
-            The Gamemakers have decided that things have become a little too comfortable. A new danger is approaching, and your current plans may no longer be enough to save you.
+            Things have become a little too comfortable. In this phase, you will face two sudden, back-to-back Gamemaker events designed to test how you react when danger strikes without warning.
           </p>
           <p className="font-semibold not-italic text-purple-950">
-            You have limited time to react. Let&apos;s see how well you adapt when the rules suddenly change.&rdquo;
+            You will not know what is coming until the countdown begins. React fast — freezing up and missing the timer will cost you heavily (-8 points).&rdquo;
           </p>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-xs text-purple-900 text-left space-y-1">
+          <div><strong>How Phase 4 Works:</strong> Two surprise survival scenarios will appear back-to-back.</div>
+          <div><strong>Don&apos;t Freeze:</strong> Every decision is individual and timed — failing to respond before the countdown ends deducts <strong>-8 points</strong>.</div>
         </div>
 
         {isGamemaker ? (
@@ -42,7 +48,7 @@ export default function Phase4Intro({ isGamemaker, durationSeconds, tributeCount
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-1.5 text-xs font-bold text-purple-800 font-mono-capitol uppercase">
                 <Clock className="w-3.5 h-3.5 text-orange-600" />
-                Initial Decision Timer (Twist rethink is 15s)
+                Set Fire Disaster Timer
               </div>
               <div className="flex flex-wrap items-center justify-center gap-1.5">
                 {PRESET_SECONDS.map((s) => (
@@ -77,7 +83,7 @@ export default function Phase4Intro({ isGamemaker, durationSeconds, tributeCount
               className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-purple-800 hover:opacity-95 text-white font-black text-sm uppercase tracking-wider shadow-lg transition-all inline-flex items-center justify-center gap-2"
             >
               <Play className="w-4 h-4 fill-white" />
-              Trigger Arena Alert ({customSeconds}s)
+              Trigger Event 1 ({customSeconds}s)
             </button>
             <p className="text-xs text-purple-500 font-mono-capitol">
               {tributeCount} tribute{tributeCount === 1 ? '' : 's'} in the arena

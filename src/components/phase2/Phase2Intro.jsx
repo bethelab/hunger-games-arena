@@ -43,6 +43,11 @@ export default function Phase2Intro({ isGamemaker, durationSeconds, tributeCount
           </p>
         </div>
 
+        <div className="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-xs text-purple-900 space-y-1 text-left">
+          <div><strong>How Alliances Work:</strong> Players who choose to form an alliance will be randomly paired into <strong>teams of 2</strong> (or one team of 3 if there is an odd number).</div>
+          <div><strong>Team Responsibility:</strong> In upcoming rounds, alliance teammates must coordinate — <strong>failing to make the same team decision will cost you points!</strong></div>
+        </div>
+
         {isGamemaker ? (
           <div className="pt-2 border-t border-purple-100 space-y-4">
             <div className="flex flex-col items-center gap-2">

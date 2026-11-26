@@ -82,7 +82,7 @@ export default function Phase5Winner({
         )}
       </div>
 
-      {/* Sponsor Score Card for Current Tribute (ONLY sponsor bonus) */}
+      {/* Sponsor Score Card for Current Tribute (ONLY sponsor bonus & any -4 no-vote penalty) */}
       {myResult && (
         <div className="w-full p-4 rounded-2xl bg-white border-2 border-purple-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -91,10 +91,16 @@ export default function Phase5Winner({
             </div>
             <div className="text-xs text-purple-800 font-mono-capitol mt-0.5">
               You received <strong>{myResult.p5Votes ?? 0}</strong> sponsor vote{(myResult.p5Votes ?? 0) === 1 ? '' : 's'}
+              {myResult.feastBonusVote ? ' (includes +1 Feast bonus vote)' : ''}
+              {myResult.p5DidVote === false ? ' • Did not vote (-4 pts)' : ''}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-black font-mono text-emerald-700">+{myResult.p5SponsorBonus ?? 0} pts</div>
+            <div className={`text-xl font-black font-mono ${
+              (myResult.p5RoundPoints ?? 0) >= 0 ? 'text-emerald-700' : 'text-rose-700'
+            }`}>
+              {(myResult.p5RoundPoints ?? 0) >= 0 ? `+${myResult.p5RoundPoints ?? 0}` : myResult.p5RoundPoints} pts
+            </div>
             <div className="text-[11px] font-mono-capitol text-purple-700">
               Total: <strong>{myResult.totalScore ?? 0} pts</strong>
             </div>

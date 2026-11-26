@@ -307,13 +307,13 @@ class SyncService {
     this.notifyTimer();
   }
 
-  // Gamemaker: advance game phases ('start_intro' | 'start_choice' | 'show_results' | 'reveal_consequences' | 'show_lesson' | 'back_to_lobby')
-  async controlGame(action, durationSeconds) {
+  // Gamemaker: advance game phases or pick featured lesson topic
+  async controlGame(action, durationSeconds, extra = {}) {
     try {
       const res = await fetch('/api/game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, durationSeconds })
+        body: JSON.stringify({ action, durationSeconds, ...extra })
       });
       if (res.ok) {
         const data = await res.json();

@@ -1,12 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Countdown from '../phase1/Countdown';
-import { Zap, CheckCircle2, BarChart3, ArrowRight } from 'lucide-react';
+import { Zap, CheckCircle2, BarChart3, ArrowRight, Lock } from 'lucide-react';
 
-const MOVE_LABELS = {
-  stay: '🛡️ Stay where you are',
-  river: '🌊 Run towards the river',
-  alliance: '🤝 Find your alliance'
-};
+// Intentionally NO points or probabilities shown before voting
+const FEAST_CARDS = [
+  {
+    id: 'skip',
+    letter: 'A',
+    icon: '🌲',
+    title: 'Skip the Feast',
+    description: 'Stay hidden deep in the woods and avoid the open clearing completely.'
+  },
+  {
+    id: 'scout',
+    letter: 'B',
+    icon: '👀',
+    title: 'Scout the tree line',
+    description: 'Creep to the edge of the trees to watch who shows up before risking anything.'
+  },
+  {
+    id: 'grab',
+    letter: 'C',
+    icon: '⚡',
+    title: 'Grab only your pack & sprint cross-angle',
+    description: 'Cut in sharply from the side, snatch your crucial pack, and bolt back to cover.'
+  }
+];
 
 function getPct(count, total) {
   if (!total) return 0;
@@ -15,38 +34,31 @@ function getPct(count, total) {
 
 export default function Phase4Twist({
   isGamemaker,
-  isInAlliance,
   countdown,
   duration,
-  twist,
-  myInitial,
-  myRethink,
+  myFeastChoice,
   poll,
-  onSubmitRethink,
+  onSubmitFeast,
   onRevealOutcomes
 }) {
-  const [pickingNew, setPickingNew] = useState(false);
-
   const totalVoted = poll?.totalVoted || 0;
   const totalTributes = poll?.totalTributes || 0;
-  const originalMove = myInitial?.move || 'stay';
-  const availableMoves = isInAlliance ? ['stay', 'river', 'alliance'] : ['stay', 'river'];
-  const alternativeMoves = availableMoves.filter(k => k !== originalMove);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-5">
-      <Countdown countdown={countdown} duration={duration || 15} />
+      <Countdown countdown={countdown} duration={duration || 25} />
 
+      {/* The Feast Banner */}
       <div className="w-full max-w-3xl rounded-3xl bg-purple-950 text-white p-5 sm:p-6 shadow-xl border-2 border-orange-500 text-center space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-black font-mono-capitol uppercase tracking-widest">
           <Zap className="w-3 h-3" />
-          Gamemaker Twist • {twist?.category || 'Arena'}
+          Gamemaker Trap • Event 2 of 2
         </div>
         <h2 className="text-xl sm:text-2xl font-black font-cinzel tracking-wide text-orange-300">
-          {twist?.icon || '🔥'} {twist?.headline || 'YOUR ESCAPE ROUTE IS BLOCKED!'}
+          🍖 THE FEAST AT DAWN
         </h2>
-        <p className="text-xs sm:text-sm text-purple-100 max-w-xl mx-auto">
-          {twist?.message || 'Your planned escape route is no longer available.'} You have 15 seconds to react!
+        <p className="text-xs sm:text-sm text-purple-100 max-w-xl mx-auto leading-relaxed">
+          The Gamemakers announce that each tribute&apos;s most desperately needed item (medicine, water, warmth) is waiting in an open clearing at dawn — baiting exhausted rivals into a guaranteed bloodbath.
         </p>
       </div>
 
@@ -56,21 +68,22 @@ export default function Phase4Twist({
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold font-mono-capitol uppercase text-orange-600">
                 <BarChart3 className="w-4 h-4" />
-                Live Adaptation Poll
+                The Feast • Live Anonymous Poll
               </div>
               <h3 className="text-xl font-black font-cinzel text-purple-950">
-                Stick or Change Plan?
+                Who Takes the Bait?
               </h3>
             </div>
             <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold font-mono-capitol">
-              {totalVoted} / {totalTributes} Responded
+              {totalVoted} / {totalTributes} Voted
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {[
-              { id: 'stick', icon: '📌', label: 'stuck with their original plan.', count: poll?.stick || 0, color: 'bg-purple-800' },
-              { id: 'change', icon: '🔄', label: 'changed their plan.', count: poll?.change || 0, color: 'bg-orange-500' }
+              { id: 'skip', icon: '🌲', label: 'skipped the Feast.', count: poll?.skip || 0, color: 'bg-purple-900' },
+              { id: 'scout', icon: '👀', label: 'scouted the tree line.', count: poll?.scout || 0, color: 'bg-purple-600' },
+              { id: 'grab', icon: '⚡', label: 'sprinted in for their pack.', count: poll?.grab || 0, color: 'bg-orange-500' }
             ].map((item) => {
               const pct = getPct(item.count, totalVoted);
               return (
@@ -106,70 +119,58 @@ export default function Phase4Twist({
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-2xl bg-white rounded-3xl border-2 border-purple-200 p-5 sm:p-6 shadow-md space-y-4">
-          <div className="text-center text-xs font-mono-capitol text-purple-700">
-            Your original plan: <strong className="text-purple-950">{MOVE_LABELS[originalMove]}</strong>
-          </div>
+        <div className="w-full max-w-4xl space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {FEAST_CARDS.map((card) => {
+              const isSelected = myFeastChoice === card.id;
+              const isLockedOther = Boolean(myFeastChoice) && !isSelected;
 
-          {!myRethink ? (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              return (
                 <button
+                  key={card.id}
                   type="button"
-                  onClick={() => onSubmitRethink('stick', originalMove)}
-                  className="p-4 rounded-2xl border-2 text-left transition-all bg-purple-50/40 border-purple-200 hover:border-orange-500 hover:bg-orange-50 active:scale-[0.98]"
-                >
-                  <div className="text-lg mb-1">📌</div>
-                  <div className="text-sm font-black font-cinzel text-purple-950">Stick to original plan</div>
-                  <div className="text-xs text-purple-700">Keep going despite the twist.</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (alternativeMoves.length === 1) {
-                      onSubmitRethink('change', alternativeMoves[0]);
-                    } else {
-                      setPickingNew(true);
-                    }
-                  }}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                    pickingNew
-                      ? 'bg-orange-50 border-orange-500 shadow-md'
-                      : 'bg-purple-50/40 border-purple-200 hover:border-orange-500 hover:bg-orange-50'
+                  disabled={Boolean(myFeastChoice)}
+                  onClick={() => onSubmitFeast(card.id)}
+                  className={`text-left p-5 rounded-3xl border-2 transition-all flex flex-col justify-between gap-3 min-h-[165px] ${
+                    isSelected
+                      ? 'bg-orange-50 border-orange-500 shadow-lg ring-4 ring-orange-300/40'
+                      : isLockedOther
+                      ? 'bg-purple-50/40 border-purple-100 opacity-45 cursor-not-allowed'
+                      : 'bg-white border-purple-200 hover:border-orange-400 hover:shadow-md active:scale-[0.98] cursor-pointer'
                   }`}
                 >
-                  <div className="text-lg mb-1">🔄</div>
-                  <div className="text-sm font-black font-cinzel text-purple-950">Change my plan</div>
-                  <div className="text-xs text-purple-700">Pivot to a different move right now.</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl">{card.icon}</span>
+                    {isSelected ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold uppercase font-mono-capitol">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Locked In
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-black font-mono-capitol">
+                        Option {card.letter}
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-black font-cinzel text-purple-950">
+                      {card.letter}. {card.title}
+                    </h3>
+                    <p className="text-xs text-purple-700 leading-relaxed">
+                      {card.description}
+                    </p>
+                  </div>
                 </button>
-              </div>
+              );
+            })}
+          </div>
 
-              {pickingNew && alternativeMoves.length > 1 && (
-                <div className="space-y-2 pt-1">
-                  <div className="text-[11px] font-bold font-mono-capitol uppercase text-purple-700">
-                    Pick your new move:
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {alternativeMoves.map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => onSubmitRethink('change', m)}
-                        className="px-3.5 py-2.5 rounded-xl border border-purple-200 bg-white hover:bg-purple-900 hover:text-white text-purple-900 text-xs font-bold transition-all text-left"
-                      >
-                        {MOVE_LABELS[m]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-3">
+          {myFeastChoice && (
+            <div className="text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono-capitol">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Response locked in ({myRethink.action === 'change' ? 'Changed plan' : 'Stuck with original'}) — Waiting for outcomes...
+                <span>Choice locked in — Waiting for outcomes...</span>
+                <Lock className="w-3.5 h-3.5" />
               </div>
             </div>
           )}

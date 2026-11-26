@@ -14,6 +14,7 @@ export default function Phase5Pitch({
   onStartVote
 }) {
   const [pitchText, setPitchText] = useState(myPitch?.pitch || '');
+  const [voteSeconds, setVoteSeconds] = useState(45);
   const submittedCount = Object.keys(pitches || {}).length;
 
   const handleSubmit = (e) => {
@@ -72,14 +73,37 @@ export default function Phase5Pitch({
           )}
 
           <div className="pt-3 border-t border-purple-100 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[11px] text-purple-500 font-mono-capitol">
-              Next: Tributes vote anonymously on the pitches (names hidden to prevent bias!).
-            </p>
+            <div className="flex items-center gap-1.5 text-xs font-mono text-purple-700">
+              <span>Voting timer:</span>
+              {[30, 45, 60, 90].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setVoteSeconds(s)}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                    voteSeconds === s
+                      ? 'bg-purple-800 text-white'
+                      : 'bg-purple-50 text-purple-800 border border-purple-200'
+                  }`}
+                >
+                  {s}s
+                </button>
+              ))}
+              <input
+                type="number"
+                min={10}
+                max={300}
+                value={voteSeconds}
+                onChange={(e) => setVoteSeconds(Math.max(10, Math.min(300, parseInt(e.target.value, 10) || 45)))}
+                className="w-14 px-1.5 py-1 rounded-lg border border-purple-300 text-center font-bold text-purple-950"
+              />
+              <span>s</span>
+            </div>
             <button
-              onClick={onStartVote}
+              onClick={() => onStartVote(voteSeconds)}
               className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-purple-800 hover:opacity-95 text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm transition-all"
             >
-              Open Sponsor Voting
+              Open Sponsor Voting ({voteSeconds}s)
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

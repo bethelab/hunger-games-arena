@@ -41,6 +41,10 @@ export default function Phase3Intro({ isGamemaker, durationSeconds, tributeCount
           </p>
         </div>
 
+        <div className="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-xs text-purple-900 text-left">
+          <strong>Alliance Notice:</strong> If you are in a team, communicate with your partner before locking in — <strong>not making the same team decision will impact you and deduct -3 points each!</strong>
+        </div>
+
         {isGamemaker ? (
           <div className="pt-2 border-t border-purple-100 space-y-4">
             <div className="flex flex-col items-center gap-2">

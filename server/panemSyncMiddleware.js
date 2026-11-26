@@ -29,7 +29,6 @@ const P3_LOCATION_POINTS = {
   stream: 16
 }
 
-// Further travel = higher chance of dying (-5) on the journey; untreated water = chance of getting sick (-2)
 const P3_TRAVEL_DEATH_PROB = {
   puddle: 0.05,
   pond: 0.18,
@@ -37,44 +36,13 @@ const P3_TRAVEL_DEATH_PROB = {
 }
 
 const P3_SICK_PROB = {
-  'puddle:drink': 0.65,
+  'puddle:drink': 1.0,
   'puddle:purify': 0.20,
-  'pond:drink': 0.40,
+  'pond:drink': 1.0,
   'pond:purify': 0.05,
-  'stream:drink': 0.15,
+  'stream:drink': 1.0,
   'stream:purify': 0.0
 }
-
-const P4_TWISTS = [
-  {
-    id: 'fire',
-    icon: '🔥',
-    category: 'Fire',
-    headline: 'YOUR ESCAPE ROUTE IS BLOCKED!',
-    message: 'Tributes, it appears some of you have become a little too predictable. Your planned escape route is no longer available.'
-  },
-  {
-    id: 'weather',
-    icon: '⛈️',
-    category: 'Weather',
-    headline: 'A SUDDEN STORM MAKES TRAVELLING DANGEROUS!',
-    message: 'Tributes, visibility has dropped to zero and lightning is striking the treetops. Moving across open ground is now treacherous.'
-  },
-  {
-    id: 'alliance',
-    icon: '👥',
-    category: 'Alliance',
-    headline: 'YOUR PARTNER HAS DISAPPEARED!',
-    message: 'Tributes, the smoke has separated the arena. You have lost contact with your allies and cannot be sure where they are.'
-  },
-  {
-    id: 'resources',
-    icon: '🎒',
-    category: 'Resources',
-    headline: 'YOUR SUPPLIES HAVE BEEN LOST!',
-    message: 'Tributes, in the scramble away from the flames, your pack was left behind. You must decide your next move with nothing in hand.'
-  }
-]
 
 function getSpeedBonus(responseTimeSec) {
   if (responseTimeSec == null) return 0
@@ -94,7 +62,7 @@ function shuffleArray(arr) {
 }
 
 export function createPanemSyncMiddleware() {
-  const GAMEMAKER_KEY = (process.env.GAMEMAKER_KEY || 'CAPITOL15').trim()
+  const GAMEMAKER_KEY = (process.env.GAMEMAKER_KEY || 'Friday').trim()
   let tributes = []
   let timerState = {
     running: false,
@@ -104,12 +72,14 @@ export function createPanemSyncMiddleware() {
     lastTick: Date.now()
   }
 
-  function createInitialGameState(duration = 30) {
+  function createInitialGameState(duration = 30, keepGamemaker = null) {
     return {
       phase: 'lobby',
       completedPhase: 0,
-      gamemakerId: null,
-      gamemakerName: null,
+      gamemakerId: keepGamemaker?.gamemakerId || null,
+      gamemakerName: keepGamemaker?.gamemakerName || null,
+      resetToken: keepGamemaker?.resetToken || 0,
+      selectedLessonIndex: 0, // Gamemaker picks which 1 of the 3 papers is featured on takeaway slides
       durationSeconds: duration,
       votingStartedAt: null,
       // Phase 1
@@ -129,12 +99,11 @@ export function createPanemSyncMiddleware() {
       p3LocationPoll: { puddle: 0, pond: 0, stream: 0, totalVoted: 0, totalTributes: 0 },
       p3ActionPoll: { drink: 0, purify: 0, totalVoted: 0, totalTributes: 0 },
       p3Calculated: false,
-      // Phase 4
-      p4Initial: {},
-      p4Twist: null,
-      p4Rethink: {},
-      p4InitialPoll: { stay: 0, river: 0, alliance: 0, totalVoted: 0, totalTributes: 0 },
-      p4TwistPoll: { stick: 0, change: 0, totalVoted: 0, totalTributes: 0 },
+      // Phase 4: Fire Disaster + The Feast
+      p4Fire: {},  // { [tributeId]: 'downhill' | 'tree' | 'ditch' }
+      p4Feast: {}, // { [tributeId]: 'skip' | 'scout' | 'grab' }
+      p4FirePoll: { downhill: 0, tree: 0, ditch: 0, totalVoted: 0, totalTributes: 0 },
+      p4FeastPoll: { skip: 0, scout: 0, grab: 0, totalVoted: 0, totalTributes: 0 },
       p4Calculated: false,
       // Phase 5
       p5Pitches: {},
@@ -208,33 +177,37 @@ export function createPanemSyncMiddleware() {
   }
 
   function recomputeP4Polls() {
-    let stay = 0, river = 0, alliance = 0
-    let stick = 0, change = 0
+    let downhill = 0, tree = 0, ditch = 0
+    let skip = 0, scout = 0, grab = 0
     for (const t of tributes) {
-      const init = gameState.p4Initial[t.id]
-      if (init?.move === 'stay') stay++
-      else if (init?.move === 'river') river++
-      else if (init?.move === 'alliance') alliance++
+      const f = gameState.p4Fire[t.id]
+      if (f === 'downhill') downhill++
+      else if (f === 'tree') tree++
+      else if (f === 'ditch') ditch++
 
-      const rev = gameState.p4Rethink[t.id]
-      if (rev?.action === 'stick') stick++
-      else if (rev?.action === 'change') change++
+      const fe = gameState.p4Feast[t.id]
+      if (fe === 'skip') skip++
+      else if (fe === 'scout') scout++
+      else if (fe === 'grab') grab++
     }
-    gameState.p4InitialPoll = {
-      stay, river, alliance,
-      totalVoted: stay + river + alliance,
+    gameState.p4FirePoll = {
+      downhill, tree, ditch,
+      totalVoted: downhill + tree + ditch,
       totalTributes: tributes.length
     }
-    gameState.p4TwistPoll = {
-      stick, change,
-      totalVoted: stick + change,
+    gameState.p4FeastPoll = {
+      skip, scout, grab,
+      totalVoted: skip + scout + grab,
       totalTributes: tributes.length
     }
   }
 
   function recomputeP5Votes() {
     const counts = {}
-    for (const t of tributes) counts[t.id] = 0
+    for (const t of tributes) {
+      // Carry forward +1 bonus vote if the tribute survived grabbing their pack at The Feast!
+      counts[t.id] = t.feastBonusVote ? 1 : 0
+    }
     for (const targetId of Object.values(gameState.p5Votes)) {
       if (targetId && counts[targetId] !== undefined) {
         counts[targetId] += 1
@@ -280,14 +253,10 @@ export function createPanemSyncMiddleware() {
 
       if (strategy === 'cornucopia') {
         actualProb = probCornucopia
-        if (timeRemaining <= 5) {
-          latePenalty = ((6 - timeRemaining) / 5) * 0.30
-        }
+        if (timeRemaining <= 5) latePenalty = ((6 - timeRemaining) / 5) * 0.30
       } else if (strategy === 'outskirts') {
         actualProb = probOutskirts
-        if (timeRemaining <= 5) {
-          latePenalty = ((6 - timeRemaining) / 5) * 0.15
-        }
+        if (timeRemaining <= 5) latePenalty = ((6 - timeRemaining) / 5) * 0.15
       }
 
       const finalElimProb = Math.min(0.95, actualProb + latePenalty)
@@ -391,7 +360,6 @@ export function createPanemSyncMiddleware() {
 
     recomputeP3Polls()
 
-    // Precompute alliance coordination & Phase 1 tool sharing per alliance
     const allianceStats = {}
     for (const team of gameState.alliances) {
       const members = team.memberIds.map(id => tributes.find(t => t.id === id)).filter(Boolean)
@@ -410,14 +378,12 @@ export function createPanemSyncMiddleware() {
       const purifyPts = act === 'purify' ? 4 : 0
       const baseScore = locPts + purifyPts
 
-      // Further travel = higher chance of dying (-5); contaminated water = chance of getting sick (-2)
       const deathProb = P3_TRAVEL_DEATH_PROB[loc] ?? 0.05
       const died = Math.random() < deathProb
 
       const sickProbBase = P3_SICK_PROB[`${loc}:${act}`] ?? 0.25
       const teamInfo = t.allianceId ? allianceStats[t.allianceId] : null
       const hasToolBenefit = Boolean(t.arenaTool) || Boolean(teamInfo?.hasPurifyTool)
-      // If they did not filter/purify water at all, they definitely get sick (-2) from contaminated water
       const effectiveSickProb = act === 'drink'
         ? 1.0
         : (hasToolBenefit ? sickProbBase * 0.5 : sickProbBase)
@@ -425,8 +391,6 @@ export function createPanemSyncMiddleware() {
 
       const deathPenalty = died ? -5 : 0
       const sickPenalty = gotSick ? -2 : 0
-
-      // Team mismatch penalties (-3 per mismatched decision) & shared tool bonus (+2 for team members if any has tool)
       const mismatchPenalty =
         (teamInfo?.locMismatch ? -3 : 0) +
         (teamInfo?.actMismatch ? -3 : 0)
@@ -463,12 +427,12 @@ export function createPanemSyncMiddleware() {
     gameState.p3Calculated = true
   }
 
-  function startP4Twist() {
-    gameState.p4Twist = P4_TWISTS[Math.floor(Math.random() * P4_TWISTS.length)]
-    gameState.p4Rethink = {}
+  function startP4Feast(secs) {
+    const feastSecs = typeof secs === 'number' && secs >= 5 ? secs : 20
+    gameState.p4Feast = {}
     gameState.phase = 'p4_twist'
-    timerState.duration = 15
-    timerState.countdown = 15
+    timerState.duration = feastSecs
+    timerState.countdown = feastSecs
     timerState.running = true
     recomputeP4Polls()
   }
@@ -478,42 +442,76 @@ export function createPanemSyncMiddleware() {
     recomputeP4Polls()
 
     tributes = tributes.map(t => {
-      const init = gameState.p4Initial[t.id]
-      const rev = gameState.p4Rethink[t.id]
+      const fireChoice = gameState.p4Fire[t.id] || null
+      const feastChoice = gameState.p4Feast[t.id] || null
 
-      const madeInitial = Boolean(init?.move)
-      const adaptedToTwist = Boolean(rev?.action)
-      const timedOut = !madeInitial || !adaptedToTwist
-
-      let p4RoundPoints = 0
-      let detail = ''
-      let breakdown = { ptsInitial: 0, ptsAdapt: 0, ptsTimer: 0, timedOut }
-
-      if (timedOut) {
-        // Did not respond within countdown -> dies and loses -8 points
-        p4RoundPoints = -8
-        detail = 'Timed out (-8)'
-      } else {
-        breakdown = { ptsInitial: 5, ptsAdapt: 5, ptsTimer: 5, timedOut: false }
-        p4RoundPoints = 15
-        detail = `Initial (+5) • Adapted to twist (+5) • Within timer (+5)`
+      // Part 1: Fire Disaster
+      // downhill: +4 | tree: -3 & 60% dying (-5) | ditch: +5 | timeout: -8
+      let firePoints = 0
+      let fireDied = false
+      let fireLabel = ''
+      if (!fireChoice) {
+        firePoints = -8
+        fireDied = true
+        fireLabel = 'Fire timeout (-8)'
+      } else if (fireChoice === 'downhill') {
+        firePoints = 4
+        fireLabel = 'Moved downhill (+4)'
+      } else if (fireChoice === 'ditch') {
+        firePoints = 5
+        fireLabel = 'Ditched gear (+5)'
+      } else if (fireChoice === 'tree') {
+        fireDied = Math.random() < 0.60
+        firePoints = fireDied ? -8 : -3
+        fireLabel = fireDied ? 'Climbed tree — fell in flames (-8)' : 'Climbed tree (-3)'
       }
 
+      // Part 2: The Feast
+      // skip: +5 | scout: +1 | grab: 50% killed (-5) else +3 & +1 bonus vote in Phase 5 | timeout: -8
+      let feastPoints = 0
+      let feastDied = false
+      let feastBonusVote = false
+      let feastLabel = ''
+      if (!feastChoice) {
+        feastPoints = -8
+        feastDied = true
+        feastLabel = 'Feast timeout (-8)'
+      } else if (feastChoice === 'skip') {
+        feastPoints = 5
+        feastLabel = 'Skipped Feast (+5)'
+      } else if (feastChoice === 'scout') {
+        feastPoints = 1
+        feastLabel = 'Scouted tree line (+1)'
+      } else if (feastChoice === 'grab') {
+        feastDied = Math.random() < 0.50
+        if (feastDied) {
+          feastPoints = -5
+          feastLabel = 'Feast ambush (-5)'
+        } else {
+          feastPoints = 3
+          feastBonusVote = true
+          feastLabel = 'Grabbed pack (+3 & +1 Pitch Vote)'
+        }
+      }
+
+      const p4RoundPoints = firePoints + feastPoints
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
 
       return {
         ...t,
-        p4InitialMove: init?.move || null,
-        p4TwistAction: rev?.action || null,
-        p4FinalMove: rev?.action === 'change' ? (rev.newMove || init?.move) : (init?.move || null),
-        p4TimedOut: timedOut,
-        p4Breakdown: breakdown,
+        p4FireChoice: fireChoice,
+        p4FeastChoice: feastChoice,
+        p4FireDied: fireDied,
+        p4FeastDied: feastDied,
+        p4FirePoints: firePoints,
+        p4FeastPoints: feastPoints,
+        feastBonusVote,
         p4RoundPoints,
         totalScore: prevScore + p4RoundPoints,
         scoreHistory: appendScoreHistory(t, {
-          phase: 'Phase 4: Gamemakers Twist',
+          phase: 'Phase 4: Fire & The Feast',
           points: p4RoundPoints,
-          detail
+          detail: `${fireLabel} • ${feastLabel}`
         })
       }
     })
@@ -549,23 +547,31 @@ export function createPanemSyncMiddleware() {
       const pitchData = gameState.p5Pitches[t.id]
       const pitchText = pitchData?.pitch?.trim() || ''
       const votes = gameState.p5VoteCounts[t.id] || 0
-      // Only keep the Sponsor popularity vote score (+5 / +3 / +1 / 0)
+      const didVote = Boolean(gameState.p5Votes[t.id])
+      const noVotePenalty = didVote ? 0 : -4
       const ptsSponsor = bonusMap[t.id] || 0
+      const p5RoundPoints = ptsSponsor + noVotePenalty
       const prevScore = typeof t.totalScore === 'number' ? t.totalScore : 0
+
+      const parts = []
+      if (ptsSponsor > 0) parts.push(`Sponsor bonus (+${ptsSponsor}, ${votes} vote${votes === 1 ? '' : 's'})`)
+      else parts.push(`${votes} sponsor vote${votes === 1 ? '' : 's'} (+0)`)
+      if (t.feastBonusVote) parts.push('includes +1 Feast vote')
+      if (!didVote) parts.push('Did not vote (-4)')
 
       return {
         ...t,
         p5Pitch: pitchText,
         p5Votes: votes,
+        p5DidVote: didVote,
+        p5NoVotePenalty: noVotePenalty,
         p5SponsorBonus: ptsSponsor,
-        p5RoundPoints: ptsSponsor,
-        totalScore: prevScore + ptsSponsor,
+        p5RoundPoints,
+        totalScore: prevScore + p5RoundPoints,
         scoreHistory: appendScoreHistory(t, {
           phase: 'Phase 5: Sponsors',
-          points: ptsSponsor,
-          detail: ptsSponsor > 0
-            ? `Sponsor vote bonus (+${ptsSponsor}, ${votes} vote${votes === 1 ? '' : 's'})`
-            : `${votes} sponsor vote${votes === 1 ? '' : 's'} (+0)`
+          points: p5RoundPoints,
+          detail: parts.join(' • ')
         })
       }
     })
@@ -621,7 +627,7 @@ export function createPanemSyncMiddleware() {
           broadcastAll()
           return
         } else if (gameState.phase === 'p4_event') {
-          startP4Twist()
+          startP4Feast(20)
           broadcastAll()
           return
         } else if (gameState.phase === 'p4_twist') {
@@ -631,8 +637,8 @@ export function createPanemSyncMiddleware() {
           return
         } else if (gameState.phase === 'p5_pitch') {
           gameState.phase = 'p5_vote'
-          timerState.duration = 45
-          timerState.countdown = 45
+          timerState.duration = gameState.durationSeconds || 45
+          timerState.countdown = gameState.durationSeconds || 45
           timerState.running = true
           recomputeP5Votes()
           broadcastAll()
@@ -704,7 +710,6 @@ export function createPanemSyncMiddleware() {
               }))
               return
             }
-            // Verify Gamemaker secret key on initial claim
             if (!gameState.gamemakerId || gameState.gamemakerId !== tribute.id) {
               const providedKey = (tribute.gamemakerKey || '').trim()
               if (providedKey !== GAMEMAKER_KEY) {
@@ -788,12 +793,17 @@ export function createPanemSyncMiddleware() {
             gameState.durationSeconds = secs
             broadcast('game', gameState)
           } else if (command.action === 'reset_arena') {
+            // Remove all players EXCEPT the Gamemaker, and bump resetToken to send players back to Reaping
             tributes = []
             timerState.running = false
             timerState.countdown = 30
             timerState.duration = 30
             timerState.visible = false
-            gameState = createInitialGameState(30)
+            gameState = createInitialGameState(30, {
+              gamemakerId: gameState.gamemakerId,
+              gamemakerName: gameState.gamemakerName,
+              resetToken: Date.now()
+            })
             broadcastAll()
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ success: true, timer: timerState, game: gameState }))
@@ -815,13 +825,16 @@ export function createPanemSyncMiddleware() {
       req.on('data', chunk => { body += chunk })
       req.on('end', () => {
         try {
-          const { action, durationSeconds } = JSON.parse(body)
+          const { action, durationSeconds, index } = JSON.parse(body)
           if (typeof durationSeconds === 'number' && durationSeconds >= 5) {
             gameState.durationSeconds = durationSeconds
             timerState.duration = durationSeconds
           }
 
-          if (action === 'start_intro') {
+          if (action === 'select_lesson_topic') {
+            const safeIdx = Math.max(0, Math.min(2, parseInt(index, 10) || 0))
+            gameState.selectedLessonIndex = safeIdx
+          } else if (action === 'start_intro') {
             gameState.phase = 'intro'
             gameState.choices = {}
             gameState.roundCalculated = false
@@ -845,6 +858,7 @@ export function createPanemSyncMiddleware() {
             calculateConsequences()
             gameState.phase = 'consequences'
           } else if (action === 'show_lesson') {
+            gameState.selectedLessonIndex = 0
             gameState.phase = 'lesson'
           } else if (action === 'back_to_lobby') {
             timerState.running = false
@@ -885,6 +899,7 @@ export function createPanemSyncMiddleware() {
             assignAlliances()
             gameState.phase = 'p2_alliances'
           } else if (action === 'show_p2_lesson') {
+            gameState.selectedLessonIndex = 0
             gameState.phase = 'p2_lesson'
           } else if (action === 'start_p3_intro') {
             const p3Secs = typeof durationSeconds === 'number' ? durationSeconds : 30
@@ -926,14 +941,14 @@ export function createPanemSyncMiddleware() {
             calculatePhase3Outcomes()
             gameState.phase = 'p3_outcome'
           } else if (action === 'show_p3_lesson') {
+            gameState.selectedLessonIndex = 0
             gameState.phase = 'p3_lesson'
           } else if (action === 'start_p4_intro') {
             const p4Secs = typeof durationSeconds === 'number' ? durationSeconds : 30
             gameState.phase = 'p4_intro'
             gameState.durationSeconds = p4Secs
-            gameState.p4Initial = {}
-            gameState.p4Twist = null
-            gameState.p4Rethink = {}
+            gameState.p4Fire = {}
+            gameState.p4Feast = {}
             gameState.p4Calculated = false
             timerState.running = false
             timerState.duration = p4Secs
@@ -943,9 +958,8 @@ export function createPanemSyncMiddleware() {
             const p4Secs = typeof durationSeconds === 'number' ? durationSeconds : 30
             gameState.phase = 'p4_event'
             gameState.durationSeconds = p4Secs
-            gameState.p4Initial = {}
-            gameState.p4Twist = null
-            gameState.p4Rethink = {}
+            gameState.p4Fire = {}
+            gameState.p4Feast = {}
             gameState.p4Calculated = false
             gameState.votingStartedAt = Date.now()
             timerState.duration = p4Secs
@@ -953,12 +967,13 @@ export function createPanemSyncMiddleware() {
             timerState.running = true
             recomputeP4Polls()
           } else if (action === 'trigger_p4_twist') {
-            startP4Twist()
+            startP4Feast(typeof durationSeconds === 'number' ? durationSeconds : 20)
           } else if (action === 'reveal_p4_outcome') {
             timerState.running = false
             calculatePhase4Outcomes()
             gameState.phase = 'p4_outcome'
           } else if (action === 'show_p4_lesson') {
+            gameState.selectedLessonIndex = 0
             gameState.phase = 'p4_lesson'
           } else if (action === 'start_p5_intro') {
             const p5Secs = typeof durationSeconds === 'number' ? durationSeconds : 60
@@ -985,17 +1000,19 @@ export function createPanemSyncMiddleware() {
             timerState.countdown = p5Secs
             timerState.running = true
           } else if (action === 'start_p5_vote') {
+            const voteSecs = typeof durationSeconds === 'number' && durationSeconds >= 5 ? durationSeconds : 45
             gameState.phase = 'p5_vote'
             gameState.p5Votes = {}
             recomputeP5Votes()
-            timerState.duration = 45
-            timerState.countdown = 45
+            timerState.duration = voteSecs
+            timerState.countdown = voteSecs
             timerState.running = true
           } else if (action === 'reveal_p5_winner') {
             timerState.running = false
             calculatePhase5Outcomes()
             gameState.phase = 'p5_winner'
           } else if (action === 'show_p5_lesson') {
+            gameState.selectedLessonIndex = 0
             gameState.phase = 'p5_lesson'
           } else if (action === 'show_finale') {
             timerState.running = false
@@ -1019,7 +1036,7 @@ export function createPanemSyncMiddleware() {
       req.on('data', chunk => { body += chunk })
       req.on('end', () => {
         try {
-          const { tributeId, strategy, phase: votePhase, newMove, pitch } = JSON.parse(body)
+          const { tributeId, strategy, phase: votePhase, pitch } = JSON.parse(body)
 
           if (votePhase === 'phase5_pitch' || gameState.phase === 'p5_pitch') {
             if (gameState.phase !== 'p5_pitch') {
@@ -1057,52 +1074,45 @@ export function createPanemSyncMiddleware() {
             return
           }
 
-          if (votePhase === 'phase4_initial' || gameState.phase === 'p4_event') {
+          if (votePhase === 'phase4_fire' || gameState.phase === 'p4_event') {
             if (gameState.phase !== 'p4_event') {
               res.statusCode = 400
-              res.end(JSON.stringify({ error: 'Phase 4 initial voting is closed' }))
+              res.end(JSON.stringify({ error: 'Fire voting is closed' }))
               return
             }
-            if (!['stay', 'river', 'alliance'].includes(strategy)) {
+            if (!['downhill', 'tree', 'ditch'].includes(strategy)) {
               res.statusCode = 400
-              res.end(JSON.stringify({ error: 'Invalid Phase 4 move' }))
+              res.end(JSON.stringify({ error: 'Invalid fire move' }))
               return
             }
-            if (!gameState.p4Initial[tributeId]) {
-              gameState.p4Initial[tributeId] = {
-                move: strategy,
-                inTime: timerState.countdown > 0
-              }
+            if (!gameState.p4Fire[tributeId]) {
+              gameState.p4Fire[tributeId] = strategy
               recomputeP4Polls()
               broadcast('game', gameState)
             }
             res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ success: true, initial: gameState.p4Initial[tributeId], game: gameState }))
+            res.end(JSON.stringify({ success: true, choice: gameState.p4Fire[tributeId], game: gameState }))
             return
           }
 
-          if (votePhase === 'phase4_twist' || gameState.phase === 'p4_twist') {
+          if (votePhase === 'phase4_feast' || gameState.phase === 'p4_twist') {
             if (gameState.phase !== 'p4_twist') {
               res.statusCode = 400
-              res.end(JSON.stringify({ error: 'Twist voting is closed' }))
+              res.end(JSON.stringify({ error: 'Feast voting is closed' }))
               return
             }
-            if (!['stick', 'change'].includes(strategy)) {
+            if (!['skip', 'scout', 'grab'].includes(strategy)) {
               res.statusCode = 400
-              res.end(JSON.stringify({ error: 'Invalid twist response' }))
+              res.end(JSON.stringify({ error: 'Invalid feast move' }))
               return
             }
-            if (!gameState.p4Rethink[tributeId]) {
-              gameState.p4Rethink[tributeId] = {
-                action: strategy,
-                newMove: strategy === 'change' ? (newMove || null) : (gameState.p4Initial[tributeId]?.move || null),
-                inTime: timerState.countdown > 0
-              }
+            if (!gameState.p4Feast[tributeId]) {
+              gameState.p4Feast[tributeId] = strategy
               recomputeP4Polls()
               broadcast('game', gameState)
             }
             res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ success: true, rethink: gameState.p4Rethink[tributeId], game: gameState }))
+            res.end(JSON.stringify({ success: true, choice: gameState.p4Feast[tributeId], game: gameState }))
             return
           }
 
